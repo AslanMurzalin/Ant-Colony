@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=5 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
 [ext_resource type="Script" path="res://scripts/grid/grid_view.gd" id="3_gridview"]
+[ext_resource type="Script" path="res://scripts/grid/grid_cursor.gd" id="4_cursor"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -25,6 +26,9 @@ color = Color(0.416, 0.659, 0.31, 1)
 
 [node name="GridView" type="Node2D" parent="."]
 script = ExtResource("3_gridview")
+
+[node name="GridCursor" type="Node2D" parent="."]
+script = ExtResource("4_cursor")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(960, 540)

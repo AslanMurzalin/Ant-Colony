@@ -258,6 +258,36 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
 
 ---
 
+### 2.6 `GridCursor` (`res://scripts/grid/grid_cursor.gd`)
+Mouse interaction and raycasting controller for grid cells, tile highlighting, and invalid-click feedback.
+
+#### Properties
+- `current_hover_cell: Vector2i`
+- `is_hover_valid: bool`
+- `flash_timer: float`
+- `invalid_flash_pos: Vector2i`
+- `current_tool: int` (0 = DIG, 1 = CANCEL, 2 = NURSERY, 3 = FOOD_STORE)
+- `color_valid_hover: Color` = `Color(1.0, 1.0, 1.0, 0.45)`
+- `color_dig_hover: Color` = `#f08a24`
+- `color_invalid_flash: Color` = `Color(0.9, 0.15, 0.15, 0.8)`
+
+#### Signals
+- `cell_clicked(coords: Vector2i, button_index: int)`
+- `hover_cell_changed(coords: Vector2i, is_valid: bool)`
+- `invalid_click_occurred(coords: Vector2i)`
+
+#### Methods
+- `select_tool(tool_id: int) -> void`
+  - *Description:* Switches the active cursor tool (Dig, Cancel, Nursery, Food Store).
+- `get_hover_cell() -> Vector2i`
+  - *Description:* Returns the grid coordinates currently under the mouse cursor.
+- `handle_click(coords: Vector2i, is_right_click: bool = false) -> void`
+  - *Description:* Processes mouse button clicks on grid cells; executes active tool or triggers invalid flash.
+- `trigger_invalid_flash(coords: Vector2i) -> void`
+  - *Description:* Triggers red flashing feedback indicating the clicked tile cannot be dug or selected.
+
+---
+
 ## 3. Entity Controllers & State Machines
 
 ### 3.1 `QueenController` (`res://scripts/entities/queen_controller.gd`)
@@ -419,9 +449,11 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
 
 ### 4.2 `BuildMenuController` (`res://scripts/ui/build_menu_controller.gd`)
 - **Properties:** `current_tool: int` (DIG, NURSERY, FOOD_STORE)
+- **Signals:** `tool_selected(tool_id: int)`
 - **Methods:**
   - `select_tool(tool_id: int) -> void`
   - `handle_grid_click(cell_coords: Vector2i) -> void`
+  - `_update_button_highlights() -> void`
 
 ### 4.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)
 - **Methods:**

@@ -57,7 +57,7 @@
   - **Deliverable:** `mark_cell_for_dig()`, `cancel_dig()`, and `complete_dig()`. Emit signals when cells change from `SOIL` to `AIR`.
   - **Acceptance Criteria:** Non-diggable rocks cannot be queued; duplicate clicks toggle off dig markers.
 
-- [ ] **Task 1.3B — Mouse Interaction & Dig Tool UI (Dev B)**
+- [x] **Task 1.3B — Mouse Interaction & Dig Tool UI (Dev B)**
   - **Goal:** Build cursor raycasting from screen to grid coordinates (`world_to_grid`).
   - **Deliverable:** Hover box showing highlighted tile; click to add dig indicator visual overlay over target soil cell.
   - **Acceptance Criteria:** Visual dig mark appears on clicked soil; clicking air or rock gives an invalid cursor flash.
