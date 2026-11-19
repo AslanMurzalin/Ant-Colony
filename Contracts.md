@@ -121,9 +121,19 @@ Controls the indirect slider-based task distribution. Enforces that percentages 
 
 #### Methods
 - `set_task_percentage(job: Enums.JobType, new_value: float) -> void`
-  - *Description:* Updates one slider's target ratio. Automatically redistributes the remaining `1.0 - new_value` proportionately among the other 3 jobs so the total remains exactly 1.0 (100%).
+  - *Description:* Updates one slider's target ratio. Automatically redistributes the remaining `1.0 - new_value` proportionately among the other unlocked jobs so the total remains exactly 1.0 (100%).
+- `lock_slider(job: Enums.JobType, is_locked: bool) -> void`
+  - *Description:* Locks or unlocks a job slider to prevent its percentage from changing during redistribution.
+- `is_slider_locked(job: Enums.JobType) -> bool`
+  - *Description:* Returns whether a job slider is currently locked.
+- `get_job_percentage(job: Enums.JobType) -> float`
+  - *Description:* Returns current target percentage (0.0 to 1.0) for a given job.
+- `get_job_target_count(job: Enums.JobType) -> int`
+  - *Description:* Returns target headcount quota for a given job.
+- `get_job_current_count(job: Enums.JobType) -> int`
+  - *Description:* Returns active headcount currently assigned to a given job.
 - `recalculate_job_targets(total_ants: int) -> void`
-  - *Description:* Computes `target_job_counts[job] = round(total_ants * target_percentages[job])`. Ensures integer sum equals `total_ants`.
+  - *Description:* Computes `target_job_counts[job]` using the Largest Remainder (Hamilton) method. Guarantees the integer sum strictly equals `total_ants` without rounding drift.
 - `request_job_for_ant(ant: AntController) -> Enums.JobType`
   - *Description:* Called when an ant completes its active chore and enters an idle state. Checks which job has `current_job_counts[job] < target_job_counts[job]` with highest deficit and returns that `Enums.JobType`.
 - `register_ant(job: Enums.JobType) -> void`

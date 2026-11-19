@@ -39,7 +39,7 @@
 ---
 
 ### [Session 1.2] Soil Grid & Task Distribution Math
-- [ ] **Task 1.2A — Task Slider Mathematical Distribution (Dev A)**
+- [x] **Task 1.2A — Task Slider Mathematical Distribution (Dev A)**
   - **Goal:** Implement 4-slider normalization logic in `task_allocation_manager.gd`.
   - **Deliverable:** `set_task_percentage(job, value)` correctly maintains a sum of `1.0` (100%) by balancing across the remaining 3 jobs. Unit tests verify sum invariant under extreme inputs (0% and 100%).
   - **Acceptance Criteria:** Sliders cannot exceed total 1.0; returns integer ant quotas without rounding drift.
