@@ -381,7 +381,61 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
 
 ---
 
-## 5. Contract Checklist for New Code
+## 5. World & Camera Controllers
+
+### 5.1 `CameraController` (`res://scripts/core/camera_controller.gd`)
+Controls the 2D cross-section camera with pan limits, dragging, and zoom controls.
+
+#### Properties
+- `pan_speed: float` = 500.0
+- `drag_sensitivity: float` = 1.0
+- `zoom_speed: float` = 0.1
+- `min_zoom: float` = 0.5
+- `max_zoom: float` = 2.0
+- `limit_top_val: int` = -300
+- `limit_bottom_val: int` = 1600
+- `limit_left_val: int` = -200
+- `limit_right_val: int` = 2120
+- `is_dragging: bool` = false
+- `drag_start_mouse_pos: Vector2`
+- `drag_start_camera_pos: Vector2`
+
+#### Signals
+- `camera_moved(new_position: Vector2)`
+- `camera_zoomed(new_zoom: Vector2)`
+
+#### Methods
+- `set_bounds(left: int, top: int, right: int, bottom: int) -> void`
+  - *Description:* Sets vertical and horizontal scrolling limits for the camera viewport.
+- `move_camera(offset: Vector2) -> void`
+  - *Description:* Moves camera by relative offset vector and clamps to bounds. Emits `camera_moved`.
+- `adjust_zoom(zoom_delta: float) -> void`
+  - *Description:* Changes camera zoom level clamped between `min_zoom` and `max_zoom`. Emits `camera_zoomed`.
+- `reset_camera() -> void`
+  - *Description:* Resets camera position to default center (960, 540) and zoom to 1.0.
+- `center_on_position(world_pos: Vector2) -> void`
+  - *Description:* Moves camera directly to center on given coordinates, clamped to view limits.
+- `_clamp_position() -> void`
+  - *Description:* Helper to constrain current camera position within configured world limits.
+
+---
+
+### 5.2 `MainController` (`res://scripts/main/main.gd`)
+Root orchestrator in `res://scenes/main/main.tscn`.
+
+#### Properties
+- `camera: CameraController`
+
+#### Signals
+- `world_initialized()`
+
+#### Methods
+- `initialize_world() -> void`
+  - *Description:* Initializes camera center position and emits `world_initialized()`.
+
+---
+
+## 6. Contract Checklist for New Code
 
 Whenever any new script or function is created in this project, the author MUST ensure:
 1. The function signature, parameters, and return types are documented in this file (`Contracts.md`).

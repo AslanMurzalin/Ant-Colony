@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3 uid="uid://cx60m3kq7y0a"]
+
+[ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
+
+[node name="Main" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="Background" type="Node2D" parent="."]
+
+[node name="Sky" type="ColorRect" parent="Background"]
+offset_left = -400.0
+offset_top = -400.0
+offset_right = 2400.0
+offset_bottom = 200.0
+color = Color(0.749, 0.89, 0.949, 1)
+
+[node name="Grass" type="ColorRect" parent="Background"]
+offset_left = -400.0
+offset_top = 200.0
+offset_right = 2400.0
+offset_bottom = 240.0
+color = Color(0.416, 0.659, 0.31, 1)
+
+[node name="Soil" type="ColorRect" parent="Background"]
+offset_left = -400.0
+offset_top = 240.0
+offset_right = 2400.0
+offset_bottom = 1240.0
+color = Color(0.541, 0.353, 0.196, 1)
+
+[node name="DeepSoil" type="ColorRect" parent="Background"]
+offset_left = -400.0
+offset_top = 1240.0
+offset_right = 2400.0
+offset_bottom = 1800.0
+color = Color(0.353, 0.22, 0.125, 1)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(960, 540)
+script = ExtResource("2_camera")

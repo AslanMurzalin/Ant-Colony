@@ -31,7 +31,7 @@
   - **Deliverable:** Autoloads registered in `project.godot`; stub methods matching `Contracts.md`.
   - **Acceptance Criteria:** Project boots with zero console warnings; enums and global signals accessible from any test node.
 
-- [ ] **Task 1.1B — Main Scene & Camera Rig (Dev B)**
+- [x] **Task 1.1B — Main Scene & Camera Rig (Dev B)**
   - **Goal:** Create `res://scenes/main/main.tscn` and configure 2D fixed cross-section camera with vertical pan limits.
   - **Deliverable:** `Camera2D` with mouse edge/drag scroll bounds or fixed view; placeholder background dividing sky, grass, and soil layers.
   - **Acceptance Criteria:** Runs in 1080p canvas with crisp pixel scaling (`stretch/mode="canvas_items"`).
