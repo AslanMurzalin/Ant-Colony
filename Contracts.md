@@ -212,10 +212,35 @@ Manages the underground 2D discrete cell grid, soil tiles, rock barriers, excava
   - *Description:* Designates an excavated `AIR` cell as a specialized chamber (`NURSERY` or `FOOD_STORE`).
 - `get_chamber_count(type: Enums.ChamberType) -> int`
   - *Description:* Returns the total number of active, fully completed chambers of specified type.
+- `get_chamber_type(coords: Vector2i) -> Enums.ChamberType`
+  - *Description:* Returns the chamber designation type at specified coordinates.
+- `is_valid_coord(coords: Vector2i) -> bool`
+  - *Description:* Checks whether coordinate vector falls within `grid_width` and `grid_height` boundaries.
+- `is_cell_walkable(coords: Vector2i) -> bool`
+  - *Description:* Returns whether a cell is traversable for ant navigation (AIR or WATER).
 - `flood_cells(row_start: int, row_end: int) -> void`
   - *Description:* Fills specified excavated cells in deep rows with `Enums.CellType.WATER`.
 - `drain_cells() -> void`
   - *Description:* Clears all water cells back to `Enums.CellType.AIR`.
+
+---
+
+### 2.5 `GridView` (`res://scripts/grid/grid_view.gd`)
+Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chambers, and active dig target markers.
+
+#### Properties
+- `color_soil: Color` = `#8a5a32`
+- `color_deep_soil: Color` = `#5a3820`
+- `color_rock: Color` = `#2d241e`
+- `color_water: Color` = `Color(0.29, 0.56, 0.85, 0.75)`
+- `color_dig_marker: Color` = `#f08a24`
+- `color_royal_chamber: Color` = `#f2c230`
+
+#### Methods
+- `_on_cell_modified(coords: Vector2i, new_type: Enums.CellType) -> void`
+  - *Description:* Signal handler that queues a canvas redraw when any cell type is updated.
+- `_on_dig_updated(coords: Vector2i) -> void`
+  - *Description:* Signal handler that queues a canvas redraw when a dig order is marked or cancelled.
 
 ---
 

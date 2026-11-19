@@ -44,7 +44,7 @@
   - **Deliverable:** `set_task_percentage(job, value)` correctly maintains a sum of `1.0` (100%) by balancing across the remaining 3 jobs. Unit tests verify sum invariant under extreme inputs (0% and 100%).
   - **Acceptance Criteria:** Sliders cannot exceed total 1.0; returns integer ant quotas without rounding drift.
 
-- [ ] **Task 1.2B — Discrete Subsurface Grid (Dev B)**
+- [x] **Task 1.2B — Discrete Subsurface Grid (Dev B)**
   - **Goal:** Implement `grid_manager.gd` with 2D array representation (`width: 60`, `height: 40`).
   - **Deliverable:** Cell types for `AIR`, `SOIL`, and `ROCK`. Render cells using `TileMapLayer` or custom draw calls.
   - **Acceptance Criteria:** Deterministic rock generation based on `seed`; surface row at Y=8 cleanly demarcates underground from surface.
