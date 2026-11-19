@@ -6,6 +6,7 @@ extends Node
 signal cell_modified(coords: Vector2i, new_type: Enums.CellType)
 signal dig_marked(coords: Vector2i)
 signal dig_cancelled(coords: Vector2i)
+signal dig_progress_updated(coords: Vector2i, progress: float)
 signal chamber_designated(coords: Vector2i, type: Enums.ChamberType)
 signal chamber_completed(coords: Vector2i, type: Enums.ChamberType)
 
@@ -16,6 +17,7 @@ var surface_row: int = 8
 
 var cell_data: Dictionary = {} # Vector2i -> Enums.CellType
 var dig_queue: Array[Vector2i] = []
+var cell_dig_progress: Dictionary = {} # Vector2i -> float (0.0 to 1.0)
 var chambers: Dictionary = {} # Vector2i -> Enums.ChamberType
 
 func _ready() -> void:
@@ -24,6 +26,7 @@ func _ready() -> void:
 func initialize_grid(seed_value: int) -> void:
 	cell_data.clear()
 	dig_queue.clear()
+	cell_dig_progress.clear()
 	chambers.clear()
 
 	var noise: FastNoiseLite = FastNoiseLite.new()
@@ -94,6 +97,9 @@ func is_cell_diggable(coords: Vector2i) -> bool:
 		return false
 	return true
 
+func is_cell_marked_for_dig(coords: Vector2i) -> bool:
+	return dig_queue.has(coords)
+
 func is_cell_walkable(coords: Vector2i) -> bool:
 	if not is_valid_coord(coords):
 		return false
@@ -104,19 +110,49 @@ func mark_cell_for_dig(coords: Vector2i) -> bool:
 	if not is_cell_diggable(coords):
 		return false
 	dig_queue.append(coords)
+	cell_dig_progress[coords] = 0.0
 	dig_marked.emit(coords)
 	return true
 
 func cancel_dig(coords: Vector2i) -> void:
 	if dig_queue.has(coords):
 		dig_queue.erase(coords)
+		cell_dig_progress.erase(coords)
 		dig_cancelled.emit(coords)
+
+func toggle_dig_mark(coords: Vector2i) -> bool:
+	if is_cell_marked_for_dig(coords):
+		cancel_dig(coords)
+		return false
+	else:
+		return mark_cell_for_dig(coords)
+
+func clear_all_dig_marks() -> void:
+	var queued_copy: Array[Vector2i] = dig_queue.duplicate()
+	for coord in queued_copy:
+		cancel_dig(coord)
+
+func apply_dig_damage(coords: Vector2i, amount: float) -> bool:
+	if not is_valid_coord(coords) or cell_data.get(coords) != Enums.CellType.SOIL:
+		return false
+	
+	var current_prog: float = cell_dig_progress.get(coords, 0.0) + amount
+	current_prog = clampf(current_prog, 0.0, 1.0)
+	cell_dig_progress[coords] = current_prog
+	dig_progress_updated.emit(coords, current_prog)
+
+	if current_prog >= 1.0:
+		complete_dig(coords)
+		return true
+	return false
+
+func get_dig_progress(coords: Vector2i) -> float:
+	return cell_dig_progress.get(coords, 0.0)
 
 func get_next_dig_target(ant_pos: Vector2) -> Vector2i:
 	if dig_queue.is_empty():
 		return Vector2i(-1, -1)
 	
-	var ant_grid: Vector2i = world_to_grid(ant_pos)
 	var best_coord: Vector2i = dig_queue[0]
 	var best_dist: float = ant_pos.distance_squared_to(grid_to_world(best_coord))
 
@@ -134,6 +170,7 @@ func complete_dig(coords: Vector2i) -> void:
 	cell_data[coords] = Enums.CellType.AIR
 	if dig_queue.has(coords):
 		dig_queue.erase(coords)
+	cell_dig_progress.erase(coords)
 	cell_modified.emit(coords, Enums.CellType.AIR)
 
 func designate_chamber(coords: Vector2i, type: Enums.ChamberType) -> bool:

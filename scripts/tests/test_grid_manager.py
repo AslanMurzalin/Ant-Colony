@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Unit tests for GridManager subsurface grid mechanics.
+Unit tests for GridManager subsurface grid mechanics and Dig Queue.
 Tests coordinate transformations, deterministic seed layout, Royal Chamber excavation,
-and dig validation rules.
+dig validation rules, duplicate toggle behavior, and dig damage progress.
 """
 
 import unittest
@@ -15,15 +15,16 @@ class MockGridManager:
         self.surface_row = 8
         self.cell_data = {}
         self.dig_queue = []
+        self.cell_dig_progress = {}
         self.chambers = {}
         self.initialize_grid(seed_val)
 
     def initialize_grid(self, seed_val):
         self.cell_data.clear()
         self.dig_queue.clear()
+        self.cell_dig_progress.clear()
         self.chambers.clear()
 
-        # Deterministic simulation matching FastNoiseLite simplex behavior
         import random
         rng = random.Random(seed_val)
 
@@ -68,15 +69,40 @@ class MockGridManager:
             return False
         return True
 
+    def is_cell_marked_for_dig(self, gx, gy):
+        return (gx, gy) in self.dig_queue
+
     def mark_cell_for_dig(self, gx, gy):
         if not self.is_cell_diggable(gx, gy):
             return False
         self.dig_queue.append((gx, gy))
+        self.cell_dig_progress[(gx, gy)] = 0.0
         return True
 
-    def complete_dig(self, gx, gy):
+    def cancel_dig(self, gx, gy):
         if (gx, gy) in self.dig_queue:
             self.dig_queue.remove((gx, gy))
+            self.cell_dig_progress.pop((gx, gy), None)
+
+    def toggle_dig_mark(self, gx, gy):
+        if self.is_cell_marked_for_dig(gx, gy):
+            self.cancel_dig(gx, gy)
+            return False
+        else:
+            return self.mark_cell_for_dig(gx, gy)
+
+    def apply_dig_damage(self, gx, gy, amount):
+        if not self.is_valid_coord(gx, gy) or self.cell_data.get((gx, gy)) != "SOIL":
+            return False
+        current = self.cell_dig_progress.get((gx, gy), 0.0) + amount
+        self.cell_dig_progress[(gx, gy)] = min(1.0, current)
+        if self.cell_dig_progress[(gx, gy)] >= 1.0:
+            self.complete_dig(gx, gy)
+            return True
+        return False
+
+    def complete_dig(self, gx, gy):
+        self.cancel_dig(gx, gy)
         self.cell_data[(gx, gy)] = "AIR"
 
 class TestGridManager(unittest.TestCase):
@@ -108,21 +134,41 @@ class TestGridManager(unittest.TestCase):
         self.assertFalse(self.grid.is_cell_diggable(10, 2))
         # Cannot dig carved entrance
         self.assertFalse(self.grid.is_cell_diggable(30, 10))
+        # Cannot dig rock
+        self.grid.cell_data[(12, 12)] = "ROCK"
+        self.assertFalse(self.grid.is_cell_diggable(12, 12))
         # Cannot dig out of bounds
         self.assertFalse(self.grid.is_cell_diggable(-5, 20))
         self.assertFalse(self.grid.is_cell_diggable(65, 20))
 
-    def test_dig_queue_and_completion(self):
+    def test_duplicate_clicks_toggle_off(self):
         target = (15, 20)
         self.grid.cell_data[target] = "SOIL"
-        self.assertTrue(self.grid.is_cell_diggable(15, 20))
-        self.assertTrue(self.grid.mark_cell_for_dig(15, 20))
-        # Duplicate marking should fail
-        self.assertFalse(self.grid.mark_cell_for_dig(15, 20))
-        # Complete dig turns cell to AIR
-        self.grid.complete_dig(15, 20)
+        # Click 1: marks for dig
+        self.assertTrue(self.grid.toggle_dig_mark(*target))
+        self.assertTrue(self.grid.is_cell_marked_for_dig(*target))
+        # Click 2: unmarks for dig
+        self.assertFalse(self.grid.toggle_dig_mark(*target))
+        self.assertFalse(self.grid.is_cell_marked_for_dig(*target))
+        # Click 3: re-marks for dig
+        self.assertTrue(self.grid.toggle_dig_mark(*target))
+        self.assertTrue(self.grid.is_cell_marked_for_dig(*target))
+
+    def test_dig_damage_completion(self):
+        target = (16, 20)
+        self.grid.cell_data[target] = "SOIL"
+        self.grid.mark_cell_for_dig(*target)
+        
+        # 50% damage: not complete
+        finished = self.grid.apply_dig_damage(*target, 0.5)
+        self.assertFalse(finished)
+        self.assertEqual(self.grid.cell_data[target], "SOIL")
+        
+        # Remaining 50% damage: completes dig, cell becomes AIR
+        finished = self.grid.apply_dig_damage(*target, 0.5)
+        self.assertTrue(finished)
         self.assertEqual(self.grid.cell_data[target], "AIR")
-        self.assertNotIn(target, self.grid.dig_queue)
+        self.assertFalse(self.grid.is_cell_marked_for_dig(*target))
 
     def test_coordinate_transforms(self):
         coords = (10, 15)

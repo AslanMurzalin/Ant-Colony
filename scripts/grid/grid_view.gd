@@ -15,11 +15,15 @@ func _ready() -> void:
 		GridManager.cell_modified.connect(_on_cell_modified)
 		GridManager.dig_marked.connect(_on_dig_updated)
 		GridManager.dig_cancelled.connect(_on_dig_updated)
+		GridManager.dig_progress_updated.connect(_on_dig_progress)
 
 func _on_cell_modified(_coords: Vector2i, _new_type: Enums.CellType) -> void:
 	queue_redraw()
 
 func _on_dig_updated(_coords: Vector2i) -> void:
+	queue_redraw()
+
+func _on_dig_progress(_coords: Vector2i, _progress: float) -> void:
 	queue_redraw()
 
 func _draw() -> void:
@@ -51,9 +55,15 @@ func _draw() -> void:
 						draw_rect(rect, color_royal_chamber.darkened(0.65))
 						draw_rect(rect, color_royal_chamber, false, 1.0)
 
-	# Draw Dig Queue Indicators
+	# Draw Dig Queue Indicators and Progress
 	for d_coord in GridManager.dig_queue:
 		var d_rect: Rect2 = Rect2(float(d_coord.x) * c_size.x, float(d_coord.y) * c_size.y, c_size.x, c_size.y)
 		draw_rect(d_rect, color_dig_marker, false, 2.0)
 		draw_line(d_rect.position, d_rect.position + d_rect.size, color_dig_marker, 1.5)
 		draw_line(Vector2(d_rect.position.x + d_rect.size.x, d_rect.position.y), Vector2(d_rect.position.x, d_rect.position.y + d_rect.size.y), color_dig_marker, 1.5)
+		
+		# Draw progress bar if cell is currently being excavated
+		var prog: float = GridManager.get_dig_progress(d_coord)
+		if prog > 0.0:
+			var bar_rect: Rect2 = Rect2(d_rect.position.x + 2.0, d_rect.position.y + d_rect.size.y - 6.0, (d_rect.size.x - 4.0) * prog, 4.0)
+			draw_rect(bar_rect, Color(0.2, 0.9, 0.2, 0.9))

@@ -52,7 +52,7 @@
 ---
 
 ### [Session 1.3] Excavation & Dig Queue
-- [ ] **Task 1.3A — Dig Queue System (Dev A)**
+- [x] **Task 1.3A — Dig Queue System (Dev A)**
   - **Goal:** Manage `dig_queue: Array[Vector2i]` in `GridManager`.
   - **Deliverable:** `mark_cell_for_dig()`, `cancel_dig()`, and `complete_dig()`. Emit signals when cells change from `SOIL` to `AIR`.
   - **Acceptance Criteria:** Non-diggable rocks cannot be queued; duplicate clicks toggle off dig markers.

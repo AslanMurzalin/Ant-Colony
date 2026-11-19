@@ -180,12 +180,14 @@ Manages the underground 2D discrete cell grid, soil tiles, rock barriers, excava
 - `surface_row: int` (Y-coordinate boundary separating surface grass from underground soil)
 - `cell_data: Dictionary` -> `{ Vector2i: CellData }`
 - `dig_queue: Array[Vector2i]` (Ordered coordinates marked for excavation)
+- `cell_dig_progress: Dictionary` -> `{ Vector2i: float }` (Dig excavation progress 0.0 to 1.0)
 - `chambers: Dictionary` -> `{ Vector2i: Enums.ChamberType }`
 
 #### Signals
 - `cell_modified(coords: Vector2i, new_type: Enums.CellType)`
 - `dig_marked(coords: Vector2i)`
 - `dig_cancelled(coords: Vector2i)`
+- `dig_progress_updated(coords: Vector2i, progress: float)`
 - `chamber_designated(coords: Vector2i, type: Enums.ChamberType)`
 - `chamber_completed(coords: Vector2i, type: Enums.ChamberType)`
 
@@ -200,10 +202,20 @@ Manages the underground 2D discrete cell grid, soil tiles, rock barriers, excava
   - *Description:* Returns `Enums.CellType` at `coords`. Returns `ROCK` if out of bounds.
 - `is_cell_diggable(coords: Vector2i) -> bool`
   - *Description:* Returns `true` if cell is within bounds, is `Enums.CellType.SOIL`, and is not already queued or excavated.
+- `is_cell_marked_for_dig(coords: Vector2i) -> bool`
+  - *Description:* Returns `true` if coordinate is present in `dig_queue`.
 - `mark_cell_for_dig(coords: Vector2i) -> bool`
   - *Description:* Adds `coords` to `dig_queue` if diggable. Emits `dig_marked`.
 - `cancel_dig(coords: Vector2i) -> void`
   - *Description:* Removes `coords` from `dig_queue`. Emits `dig_cancelled`.
+- `toggle_dig_mark(coords: Vector2i) -> bool`
+  - *Description:* Toggles dig marking on cell: cancels if already queued, marks if diggable. Returns new marked state.
+- `clear_all_dig_marks() -> void`
+  - *Description:* Cancels all pending dig orders in `dig_queue`.
+- `apply_dig_damage(coords: Vector2i, amount: float) -> bool`
+  - *Description:* Advances excavation progress on cell. If progress reaches 1.0, calls `complete_dig(coords)` and returns `true`. Emits `dig_progress_updated`.
+- `get_dig_progress(coords: Vector2i) -> float`
+  - *Description:* Returns current excavation progress (0.0 to 1.0) on a cell.
 - `get_next_dig_target(ant_pos: Vector2) -> Vector2i`
   - *Description:* Returns the optimal reachable cell in `dig_queue` closest to `ant_pos`.
 - `complete_dig(coords: Vector2i) -> void`
@@ -241,6 +253,8 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Signal handler that queues a canvas redraw when any cell type is updated.
 - `_on_dig_updated(coords: Vector2i) -> void`
   - *Description:* Signal handler that queues a canvas redraw when a dig order is marked or cancelled.
+- `_on_dig_progress(coords: Vector2i, progress: float) -> void`
+  - *Description:* Signal handler that queues a canvas redraw when a cell excavation progress updates.
 
 ---
 
