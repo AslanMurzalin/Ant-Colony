@@ -3,9 +3,10 @@ extends Node2D
 
 # Visual renderer for the underground soil grid, rocks, excavated tunnels, and dig markers.
 
-var color_soil: Color = Color("#8a5a32")
-var color_deep_soil: Color = Color("#5a3820")
-var color_rock: Color = Color("#2d241e")
+var color_soil: Color = Color(0.424, 0.275, 0.200) # Warm soil #6c4633
+var color_deep_soil: Color = Color(0.320, 0.200, 0.140) # Deep subsoil #523324
+var color_rock: Color = Color(0.18, 0.16, 0.15)
+var color_tunnel: Color = Color(0.59, 0.39, 0.22, 0.30)
 var color_water: Color = Color(0.29, 0.56, 0.85, 0.75)
 var color_dig_marker: Color = Color("#f08a24")
 var color_royal_chamber: Color = Color("#f2c230")
@@ -57,6 +58,7 @@ func _draw() -> void:
 				Enums.CellType.WATER:
 					draw_rect(rect, color_water)
 				Enums.CellType.AIR:
+					draw_rect(rect, color_tunnel)
 					var chamber: Enums.ChamberType = GridManager.get_chamber_type(coords)
 					if chamber == Enums.ChamberType.ROYAL:
 						draw_rect(rect, color_royal_chamber.darkened(0.65))

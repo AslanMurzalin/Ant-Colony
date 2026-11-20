@@ -32,11 +32,12 @@ func _update_hunger_bubble() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	# Draw plump segmented grub body
-	var col: Color = Color(0.92, 0.90, 0.82)
-	draw_circle(Vector2(-3, 0), 4.0, col)
-	draw_circle(Vector2(2, 0), 5.0, col)
-	draw_circle(Vector2(6, 0), 4.0, col)
-	draw_circle(Vector2(-3, 0), 4.0, col.darkened(0.2), false, 1.0)
-	draw_circle(Vector2(2, 0), 5.0, col.darkened(0.2), false, 1.0)
-	draw_circle(Vector2(6, 0), 4.0, col.darkened(0.2), false, 1.0)
+	if not has_node("Sprite2D"):
+		# Draw plump segmented grub body
+		var col: Color = Color(0.92, 0.90, 0.82)
+		draw_circle(Vector2(-3, 0), 4.0, col)
+		draw_circle(Vector2(2, 0), 5.0, col)
+		draw_circle(Vector2(6, 0), 4.0, col)
+		draw_circle(Vector2(-3, 0), 4.0, col.darkened(0.2), false, 1.0)
+		draw_circle(Vector2(2, 0), 5.0, col.darkened(0.2), false, 1.0)
+		draw_circle(Vector2(6, 0), 4.0, col.darkened(0.2), false, 1.0)

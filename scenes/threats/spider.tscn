@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" path="res://assets/sprites_topdown/spider.png" id="2_texture"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_spider"]
-radius = 12.0
+radius = 14.0
 
 [node name="Spider" type="CharacterBody2D"]
 script = ExtResource("1_spider")
@@ -13,5 +13,5 @@ script = ExtResource("1_spider")
 shape = SubResource("CircleShape2D_spider")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.06, 0.06)
+scale = Vector2(0.6, 0.6)
 texture = ExtResource("2_texture")
