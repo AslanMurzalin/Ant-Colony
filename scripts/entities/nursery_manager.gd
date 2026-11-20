@@ -1,4 +1,3 @@
-class_name NurseryManager
 extends Node
 
 # Tracks eggs and larvae inside the nursery, managing incubation and maturation timers.
