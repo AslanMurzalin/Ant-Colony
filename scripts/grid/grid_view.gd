@@ -9,6 +9,8 @@ var color_rock: Color = Color("#2d241e")
 var color_water: Color = Color(0.29, 0.56, 0.85, 0.75)
 var color_dig_marker: Color = Color("#f08a24")
 var color_royal_chamber: Color = Color("#f2c230")
+var color_nursery: Color = Color(0.78, 0.45, 0.72)
+var color_food_store: Color = Color(0.88, 0.62, 0.18)
 
 func _ready() -> void:
 	if GridManager != null:
@@ -16,6 +18,8 @@ func _ready() -> void:
 		GridManager.dig_marked.connect(_on_dig_updated)
 		GridManager.dig_cancelled.connect(_on_dig_updated)
 		GridManager.dig_progress_updated.connect(_on_dig_progress)
+		GridManager.chamber_designated.connect(_on_chamber_updated)
+		GridManager.chamber_completed.connect(_on_chamber_updated)
 
 func _on_cell_modified(_coords: Vector2i, _new_type: Enums.CellType) -> void:
 	queue_redraw()
@@ -24,6 +28,9 @@ func _on_dig_updated(_coords: Vector2i) -> void:
 	queue_redraw()
 
 func _on_dig_progress(_coords: Vector2i, _progress: float) -> void:
+	queue_redraw()
+
+func _on_chamber_updated(_coords: Vector2i, _type: Enums.ChamberType) -> void:
 	queue_redraw()
 
 func _draw() -> void:
@@ -54,6 +61,12 @@ func _draw() -> void:
 					if chamber == Enums.ChamberType.ROYAL:
 						draw_rect(rect, color_royal_chamber.darkened(0.65))
 						draw_rect(rect, color_royal_chamber, false, 1.0)
+					elif chamber == Enums.ChamberType.NURSERY:
+						draw_rect(rect, color_nursery.darkened(0.65))
+						draw_rect(rect, color_nursery, false, 1.0)
+					elif chamber == Enums.ChamberType.FOOD_STORE:
+						draw_rect(rect, color_food_store.darkened(0.65))
+						draw_rect(rect, color_food_store, false, 1.0)
 
 	# Draw Dig Queue Indicators and Progress
 	for d_coord in GridManager.dig_queue:

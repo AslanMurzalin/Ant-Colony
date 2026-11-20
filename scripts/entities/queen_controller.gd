@@ -104,3 +104,7 @@ func tick_starvation(delta: float) -> void:
 func attempt_lay_egg() -> void:
 	if not is_starving and GameManager.total_workers_alive < 50:
 		queen_laid_egg.emit()
+		var spawn_pos: Vector2 = global_position + Vector2(randf_range(-24.0, 24.0), 12.0)
+		var nursery = get_node_or_null("/root/NurseryManager")
+		if nursery != null and nursery.has_method("spawn_egg"):
+			nursery.spawn_egg(spawn_pos)

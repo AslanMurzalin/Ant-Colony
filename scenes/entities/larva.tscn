@@ -1,0 +1,23 @@
+[gd_scene format=3 uid="uid://c7m5larvbbba"]
+
+[ext_resource type="Script" path="res://scripts/entities/larva_entity.gd" id="1_larva"]
+
+[node name="Larva" type="Node2D"]
+script = ExtResource("1_larva")
+
+[node name="HungerBubble" type="Node2D" parent="."]
+position = Vector2(0, -12)
+
+[node name="BubbleBackground" type="ColorRect" parent="HungerBubble"]
+offset_left = -6.0
+offset_top = -6.0
+offset_right = 6.0
+offset_bottom = 6.0
+color = Color(1, 1, 1, 0.85)
+
+[node name="FoodIcon" type="ColorRect" parent="HungerBubble"]
+offset_left = -3.0
+offset_top = -3.0
+offset_right = 3.0
+offset_bottom = 3.0
+color = Color(0.95, 0.76, 0.19, 1)

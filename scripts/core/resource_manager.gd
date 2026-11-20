@@ -14,6 +14,12 @@ var food_burn_timer: float = 0.0
 
 func _ready() -> void:
 	food_changed.emit(stored_food, get_max_capacity())
+	var grid_mgr: Node = get_node_or_null("/root/GridManager")
+	if grid_mgr != null and grid_mgr.has_signal("chamber_completed"):
+		grid_mgr.connect("chamber_completed", Callable(self, "_on_chamber_completed"))
+
+func _on_chamber_completed(_coords: Vector2i, _type: Enums.ChamberType) -> void:
+	food_changed.emit(stored_food, get_max_capacity())
 
 func get_max_capacity() -> int:
 	var bonus_capacity: int = 0

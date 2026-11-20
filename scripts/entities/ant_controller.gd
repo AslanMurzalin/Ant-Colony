@@ -21,6 +21,9 @@ var current_path_index: int = 0
 var dig_time_per_tile: float = 2.5
 var walk_anim_timer: float = 0.0
 
+var target_food_source: FoodSource = null
+var target_feed_entity: Node2D = null
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var job_badge: ColorRect = $JobBadge
 @onready var cargo_node: Node2D = $CargoNode
@@ -181,12 +184,152 @@ func _tick_dig() -> void:
 			set_ant_state(Enums.AntState.IDLE)
 
 func _tick_forage() -> void:
-	if state == Enums.AntState.IDLE:
-		request_job_transition()
+	match state:
+		Enums.AntState.IDLE:
+			request_job_transition()
+			if current_job != Enums.JobType.FORAGE:
+				return
+			
+			var spawner: FoodSpawner = null
+			var main_node: Node = get_tree().current_scene
+			if main_node != null:
+				spawner = main_node.get_node_or_null("FoodSpawner") as FoodSpawner
+			
+			if spawner != null:
+				var food: FoodSource = spawner.get_closest_food(global_position)
+				if food != null:
+					target_food_source = food
+					navigate_to(food.global_position)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+
+		Enums.AntState.TRAVELING_TO_TARGET:
+			if target_food_source == null or not is_instance_valid(target_food_source) or target_food_source.is_depleted:
+				target_food_source = null
+				path_waypoints.clear()
+				set_ant_state(Enums.AntState.IDLE)
+				return
+			
+			var reached: bool = move_along_path(get_physics_process_delta_time())
+			var dist: float = global_position.distance_to(target_food_source.global_position)
+			if reached or dist <= 20.0:
+				path_waypoints.clear()
+				velocity = Vector2.ZERO
+				var harvested: int = target_food_source.harvest_unit()
+				if harvested > 0:
+					carried_cargo = "food"
+					update_cargo_visuals()
+					target_food_source = null
+					var deposit_pos: Vector2 = _find_nearest_food_storage()
+					navigate_to(deposit_pos)
+					set_ant_state(Enums.AntState.CARRYING_PAYLOAD)
+				else:
+					target_food_source = null
+					set_ant_state(Enums.AntState.IDLE)
+
+		Enums.AntState.CARRYING_PAYLOAD:
+			var reached_deposit: bool = move_along_path(get_physics_process_delta_time())
+			var dist: float = global_position.distance_to(current_target_pos)
+			if reached_deposit or dist <= 24.0:
+				path_waypoints.clear()
+				velocity = Vector2.ZERO
+				ResourceManager.add_food(1)
+				GameManager.food_gathered_today += 1
+				carried_cargo = null
+				update_cargo_visuals()
+				set_ant_state(Enums.AntState.IDLE)
 
 func _tick_nurse() -> void:
-	if state == Enums.AntState.IDLE:
-		request_job_transition()
+	match state:
+		Enums.AntState.IDLE:
+			request_job_transition()
+			if current_job != Enums.JobType.NURSE:
+				return
+			
+			if not ResourceManager.has_food(1):
+				return
+			
+			target_feed_entity = null
+			var main_node: Node = get_tree().current_scene
+			var queen: QueenController = main_node.get_node_or_null("Queen") as QueenController if main_node != null else null
+			if queen != null and (queen.is_starving or queen.hunger_timer < 10.0):
+				target_feed_entity = queen
+			else:
+				var nursery = get_node_or_null("/root/NurseryManager")
+				if nursery != null and nursery.has_method("get_hungry_larva"):
+					var larva: LarvaEntity = nursery.get_hungry_larva()
+					if larva != null:
+						target_feed_entity = larva
+			
+			if target_feed_entity != null:
+				var fetch_pos: Vector2 = _find_nearest_food_storage()
+				navigate_to(fetch_pos)
+				if path_waypoints.size() > 0:
+					set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+
+		Enums.AntState.TRAVELING_TO_TARGET:
+			var reached: bool = move_along_path(get_physics_process_delta_time())
+			var dist: float = global_position.distance_to(current_target_pos)
+			if reached or dist <= 24.0:
+				path_waypoints.clear()
+				velocity = Vector2.ZERO
+				if ResourceManager.consume_food(1):
+					carried_cargo = "food"
+					update_cargo_visuals()
+					if target_feed_entity != null and is_instance_valid(target_feed_entity):
+						navigate_to(target_feed_entity.global_position)
+						set_ant_state(Enums.AntState.CARRYING_PAYLOAD)
+					else:
+						ResourceManager.add_food(1)
+						carried_cargo = null
+						update_cargo_visuals()
+						set_ant_state(Enums.AntState.IDLE)
+				else:
+					target_feed_entity = null
+					set_ant_state(Enums.AntState.IDLE)
+
+		Enums.AntState.CARRYING_PAYLOAD:
+			if target_feed_entity == null or not is_instance_valid(target_feed_entity):
+				ResourceManager.add_food(1)
+				carried_cargo = null
+				update_cargo_visuals()
+				set_ant_state(Enums.AntState.IDLE)
+				return
+			
+			var reached_target: bool = move_along_path(get_physics_process_delta_time())
+			var dist: float = global_position.distance_to(target_feed_entity.global_position)
+			if reached_target or dist <= 28.0:
+				path_waypoints.clear()
+				velocity = Vector2.ZERO
+				if target_feed_entity is QueenController:
+					(target_feed_entity as QueenController).feed_queen(1)
+				elif target_feed_entity is LarvaEntity:
+					(target_feed_entity as LarvaEntity).feed()
+				target_feed_entity = null
+				carried_cargo = null
+				update_cargo_visuals()
+				set_ant_state(Enums.AntState.IDLE)
+
+func _find_nearest_food_storage() -> Vector2:
+	if GridManager != null:
+		var store_coords: Array[Vector2i] = []
+		for coord in GridManager.chambers.keys():
+			if GridManager.chambers[coord] == Enums.ChamberType.FOOD_STORE:
+				store_coords.append(coord)
+		
+		if store_coords.size() > 0:
+			var best_pos: Vector2i = store_coords[0]
+			var min_dist: float = global_position.distance_squared_to(GridManager.grid_to_world(best_pos))
+			for sc in store_coords:
+				var d: float = global_position.distance_squared_to(GridManager.grid_to_world(sc))
+				if d < min_dist:
+					min_dist = d
+					best_pos = sc
+			return GridManager.grid_to_world(best_pos)
+	
+	# Fallback to Royal Chamber center
+	return Vector2(976.0, 528.0)
+
 
 func _tick_defend() -> void:
 	if state == Enums.AntState.IDLE:

@@ -108,12 +108,12 @@
 ## Phase 3: Resource Economy & Growth
 
 ### [Session 3.1] Foraging & Surface Food Nodes
-- [ ] **Task 3.1A — Surface Food Spawner & Deposit Logic (Dev A)**
+- [x] **Task 3.1A — Surface Food Spawner & Deposit Logic (Dev A)**
   - **Goal:** Food node system on the surface. Close nodes (small crumbs) vs. Far nodes (dead insects/fruit).
   - **Deliverable:** Nodes spawn on grass with remaining unit counters; `ResourceManager.add_food()` stores carried food.
   - **Acceptance Criteria:** Foragers seek closest available surface food, pick 1 unit, carry it down to storage, and repeat.
 
-- [ ] **Task 3.1B — Food Store Chambers & Capacity (Dev B)**
+- [x] **Task 3.1B — Food Store Chambers & Capacity (Dev B)**
   - **Goal:** Chamber designation tool for `FOOD_STORE`.
   - **Deliverable:** Excavating and marking a 3x2 room as `FOOD_STORE` increases colony food capacity in `ResourceManager`.
   - **Acceptance Criteria:** Food HUD reflects `stored / max_capacity`; ants deposit food into nearest available store chamber.
@@ -121,12 +121,12 @@
 ---
 
 ### [Session 3.2] Nursing, Eggs & Population Growth
-- [ ] **Task 3.2A — Egg Incubation & Larva Metamorphosis (Dev A)**
+- [x] **Task 3.2A — Egg Incubation & Larva Metamorphosis (Dev A)**
   - **Goal:** Implement `nursery_manager.gd` tracking egg incubation (25s) and larva feeding (needs 2 food).
   - **Deliverable:** Fed larvae emerge as new adult `AntController` workers; respects the 50-ant hard population cap.
   - **Acceptance Criteria:** No new eggs hatch if population reaches 50; Nurse ants prioritize feeding Queen first, then larvae.
 
-- [ ] **Task 3.2B — Nursery Chamber & Larva Visuals (Dev B)**
+- [x] **Task 3.2B — Nursery Chamber & Larva Visuals (Dev B)**
   - **Goal:** Build `Nursery` chamber type and visual representation of eggs/larvae on chamber floor.
   - **Deliverable:** Eggs appear in nest; larvae show a small hunger bubble when requiring food from a Nurse ant.
   - **Acceptance Criteria:** Nurse ant walks to Food Store, picks food, carries it to larva, and hunger bubble disappears.

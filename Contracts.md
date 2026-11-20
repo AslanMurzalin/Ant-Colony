@@ -168,6 +168,8 @@ Tracks food quantities, storage limits, spoil timers, and delivers food to the c
   - *Description:* Returns `stored_food >= amount`.
 - `spoil_food(amount: int) -> void`
   - *Description:* Removes `amount` from `stored_food` due to rain flooding or elapsed spoil ticks in non-chamber caches.
+- `_on_chamber_completed(coords: Vector2i, type: Enums.ChamberType) -> void`
+  - *Description:* Signal listener that triggers food capacity recalculation and emits food_changed when a food store chamber is completed.
 
 ---
 
@@ -261,6 +263,8 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Signal handler that queues a canvas redraw when a dig order is marked or cancelled.
 - `_on_dig_progress(coords: Vector2i, progress: float) -> void`
   - *Description:* Signal handler that queues a canvas redraw when a cell excavation progress updates.
+- `_on_chamber_updated(coords: Vector2i, type: Enums.ChamberType) -> void`
+  - *Description:* Signal handler that queues a canvas redraw when a specialized chamber is designated or completed.
 
 ---
 
@@ -378,6 +382,8 @@ Base controller for worker ants. Manages locomotion, pathfinding, visual role ba
   - *Description:* Updates color badge tint according to active job (Brown, Orange, Green, Red).
 - `update_cargo_visuals() -> void`
   - *Description:* Displays or hides carried payload indicator (dirt clump or breadcrumb).
+- `_find_nearest_food_storage() -> Vector2`
+  - *Description:* Queries GridManager for the closest designated food store chamber, or falls back to the Royal Chamber.
 
 ---
 
@@ -405,10 +411,61 @@ Tracks eggs and larvae inside the nursery, managing incubation and maturation ti
   - *Description:* Replaces egg instance with a larva instance.
 - `mature_larva(larva_id: int) -> void`
   - *Description:* Consumes larva and instantiates a new adult `AntController` (Worker) into the colony if total population < 50.
+- `_process_lifecycle(delta: float) -> void`
+  - *Description:* Updates incubation timers for eggs and growth countdown for fed larvae.
+- `get_hungry_larva() -> LarvaEntity`
+  - *Description:* Finds and returns the first active larva that requires food feeding.
+- `get_random_nursery_position() -> Vector2`
+  - *Description:* Returns a world coordinate in an excavated nursery chamber, or defaults to the royal chamber.
+
+#### `EggEntity` (`res://scripts/entities/egg_entity.gd`)
+- `egg_id: int`
+- `incubation_timer: float`
+
+#### `LarvaEntity` (`res://scripts/entities/larva_entity.gd`)
+- `larva_id: int`
+- `food_fed: int`
+- `food_required: int`
+- `growth_timer: float`
+- `is_fed: bool`
+- **Methods:**
+  - `feed() -> bool`
+  - `is_hungry() -> bool`
+  - `_update_hunger_bubble() -> void`
 
 ---
 
-### 3.4 `ThreatManager` (`res://scripts/threats/threat_manager.gd`)
+### 3.4 Economy Entities (`FoodSource` / `FoodSpawner`)
+
+#### `FoodSource` (`res://scripts/economy/food_source.gd`)
+- `food_units: int`
+- `initial_units: int`
+- `source_name: String`
+- `is_depleted: bool`
+- **Signals:**
+  - `food_harvested(remaining: int)`
+  - `food_depleted()`
+- **Methods:**
+  - `harvest_unit() -> int`
+  - `get_remaining_food() -> int`
+  - `_update_display() -> void`
+
+#### `FoodSpawner` (`res://scripts/economy/food_spawner.gd`)
+- `active_sources: Array[FoodSource]`
+- `spawn_timer: float`
+- `spawn_interval: float`
+- **Signals:**
+  - `food_spawned(source: FoodSource)`
+- **Methods:**
+  - `spawn_initial_food() -> void`
+  - `spawn_food_node(pos: Vector2, amount: int, s_name: String) -> FoodSource`
+  - `_spawn_periodic_food() -> void`
+  - `get_closest_food(from_pos: Vector2) -> FoodSource`
+  - `_on_food_depleted(source: FoodSource) -> void`
+
+---
+
+### 3.5 `ThreatManager` (`res://scripts/threats/threat_manager.gd`)
 Coordinates threat wave generation, warning alert timers, and environmental disasters based on the run seed and current day.
 
 #### Properties
