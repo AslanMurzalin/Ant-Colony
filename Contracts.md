@@ -234,6 +234,12 @@ Manages the underground 2D discrete cell grid, soil tiles, rock barriers, excava
   - *Description:* Fills specified excavated cells in deep rows with `Enums.CellType.WATER`.
 - `drain_cells() -> void`
   - *Description:* Clears all water cells back to `Enums.CellType.AIR`.
+- `update_cell_navigation(coords: Vector2i) -> void`
+  - *Description:* Updates the AStarGrid2D solid/traversable state for the specified cell coordinates.
+- `get_path_between(start_cell: Vector2i, end_cell: Vector2i) -> Array[Vector2i]`
+  - *Description:* Computes lightweight A* path between two grid cells, traversing only walkable excavated cells. If destination is solid soil, paths to adjacent reachable cell.
+- `get_world_path(start_cell: Vector2i, end_cell: Vector2i) -> Array[Vector2]`
+  - *Description:* Converts grid coordinate path from `get_path_between` into an ordered array of central pixel world positions.
 
 ---
 
@@ -318,6 +324,10 @@ Anchored in the Royal Chamber. Serves as the primary win/lose condition and lays
   - *Description:* If `hunger_timer <= 0`, deals periodic health damage directly. If health hits 0, calls `GameManager.trigger_defeat("Queen died of starvation!")`.
 - `attempt_lay_egg() -> void`
   - *Description:* If not starving and colony size < 50, triggers `NurseryManager.spawn_egg()` and emits `queen_laid_egg()`.
+- `_process_queen_logic(delta: float) -> void`
+  - *Description:* Processes hunger decay, starvation damage ticks, and egg incubation countdown during active simulation.
+- `_update_visuals(delta: float) -> void`
+  - *Description:* Updates idle breathing oscillation, distress damage flashing, and starvation blinking tints.
 
 ---
 
@@ -358,6 +368,16 @@ Base controller for worker ants. Manages locomotion, pathfinding, visual role ba
   - *Description:* Patrols nest entrance or chamber chokepoint. If threat enters detection radius, enters `COMBAT` and attacks until threat is slain or ant dies.
 - `take_damage(amount: float) -> void`
   - *Description:* Reduces health. If health <= 0, drops cargo, unregisters from `TaskAllocationManager`, emits `ant_died`, and plays death animation before freeing.
+- `set_ant_state(new_state: Enums.AntState) -> void`
+  - *Description:* Transitions worker state machine to a new state and emits `ant_state_changed`.
+- `move_along_path(delta: float) -> bool`
+  - *Description:* Advances ant along navigation waypoints using velocity and `move_and_slide`. Returns `true` when path end is reached.
+- `_animate_walk(delta: float) -> void`
+  - *Description:* Updates sprite bobbing and flips sprite horizontally based on locomotion direction.
+- `update_job_visuals() -> void`
+  - *Description:* Updates color badge tint according to active job (Brown, Orange, Green, Red).
+- `update_cargo_visuals() -> void`
+  - *Description:* Displays or hides carried payload indicator (dirt clump or breadcrumb).
 
 ---
 
@@ -513,6 +533,8 @@ Root orchestrator in `res://scenes/main/main.tscn`.
 #### Methods
 - `initialize_world() -> void`
   - *Description:* Initializes camera center position and emits `world_initialized()`.
+- `spawn_starter_ants(count: int) -> void`
+  - *Description:* Spawns starter worker ants in the royal chamber and apportions initial tasks via `TaskAllocationManager`.
 
 ---
 

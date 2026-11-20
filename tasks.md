@@ -67,12 +67,12 @@
 ## Phase 2: Worker Ants & Queen
 
 ### [Session 2.1] Queen Entity & Food Depot
-- [ ] **Task 2.1A — Queen Controller & Hunger Loop (Dev A)**
+- [x] **Task 2.1A — Queen Controller & Hunger Loop (Dev A)**
   - **Goal:** Implement `queen_controller.gd` with health, hunger timer, and starvation damage ticks.
   - **Deliverable:** Queen takes starvation damage if hunger timer expires without food; `feed_queen()` heals and resets hunger.
   - **Acceptance Criteria:** Queen emits `queen_starvation_started` and `queen_damaged`; triggers game over if health drops to 0.
 
-- [ ] **Task 2.1B — Queen Scene & Royal Chamber Setup (Dev B)**
+- [x] **Task 2.1B — Queen Scene & Royal Chamber Setup (Dev B)**
   - **Goal:** Build `queen.tscn` with sprite, idle breathing animation, distress flash, and health bar.
   - **Deliverable:** Fixed placement in the starting Royal Chamber excavated at initialization.
   - **Acceptance Criteria:** Queen displays health bar above sprite; visually changes to distressed state when damaged.
@@ -80,12 +80,12 @@
 ---
 
 ### [Session 2.2] Worker Ant Base & Navigation
-- [ ] **Task 2.2A — Underground A* Grid Navigation (Dev A)**
+- [x] **Task 2.2A — Underground A* Grid Navigation (Dev A)**
   - **Goal:** Build lightweight A* grid pathfinder in `GridManager` traversing only `AIR` cells.
   - **Deliverable:** `get_path_between(start_cell, end_cell) -> Array[Vector2i]` that updates whenever a tile is excavated.
   - **Acceptance Criteria:** Ants successfully find path from surface entrance down to Royal Chamber without crossing solid soil.
 
-- [ ] **Task 2.2B — Ant Visual Entity & Color Bands (Dev B)**
+- [x] **Task 2.2B — Ant Visual Entity & Color Bands (Dev B)**
   - **Goal:** Create `ant.tscn` (CharacterBody2D) with 4-frame walk animation and job color badge.
   - **Deliverable:** Color tint dynamically swaps between Brown (Forager), Orange (Digger), Green (Nurse), Red (Defender).
   - **Acceptance Criteria:** Ant moves smoothly along path waypoints; cargo node displays carried breadcrumb or dirt clump.
@@ -93,12 +93,12 @@
 ---
 
 ### [Session 2.3] Job State Machine & Delayed Switching
-- [ ] **Task 2.3A — Ant FSM & Inertia Logic (Dev A)**
+- [x] **Task 2.3A — Ant FSM & Inertia Logic (Dev A)**
   - **Goal:** Implement `AntController` state transitions (`IDLE`, `TRAVELING`, `WORKING`, `CARRYING`).
   - **Deliverable:** Worker only adopts a new job from `TaskAllocationManager` when reaching `IDLE` state after finishing current task.
   - **Acceptance Criteria:** Changing sliders mid-trip does not cause ants to instantly drop cargo; transition happens upon job completion.
 
-- [ ] **Task 2.3B — Digger Job Execution (Dev B)**
+- [x] **Task 2.3B — Digger Job Execution (Dev B)**
   - **Goal:** Digger ant behavior: pick next cell from `GridManager.dig_queue`, walk to it, play dig animation, and remove tile.
   - **Deliverable:** Digging duration timer (2.5 seconds per soil tile); tile turns into `AIR` upon completion.
   - **Acceptance Criteria:** Digger chips away dirt, finishes block, and queries the next closest dig marker automatically.

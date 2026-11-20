@@ -149,7 +149,7 @@ func recalculate_job_targets(total_ants: int) -> void:
 
 	job_assignments_changed.emit(current_job_counts, target_job_counts)
 
-func request_job_for_ant(ant: Node) -> Enums.JobType:
+func request_job_for_ant(ant: AntController) -> Enums.JobType:
 	var highest_deficit: int = -9999
 	var selected_job: Enums.JobType = Enums.JobType.FORAGE
 

@@ -19,6 +19,7 @@ var cell_data: Dictionary = {} # Vector2i -> Enums.CellType
 var dig_queue: Array[Vector2i] = []
 var cell_dig_progress: Dictionary = {} # Vector2i -> float (0.0 to 1.0)
 var chambers: Dictionary = {} # Vector2i -> Enums.ChamberType
+var astar: AStarGrid2D = AStarGrid2D.new()
 
 func _ready() -> void:
 	initialize_grid(1337)
@@ -65,6 +66,14 @@ func initialize_grid(seed_value: int) -> void:
 
 	for pos in cell_data.keys():
 		cell_modified.emit(pos, cell_data[pos])
+
+	astar.region = Rect2i(0, 0, grid_width, grid_height)
+	astar.cell_size = cell_size
+	astar.diagonal_mode = AStarGrid2D.DIAGONAL_MODE_NEVER
+	astar.update()
+
+	for pos in cell_data.keys():
+		astar.set_point_solid(pos, not is_cell_walkable(pos))
 
 func world_to_grid(world_pos: Vector2) -> Vector2i:
 	return Vector2i(
@@ -171,6 +180,7 @@ func complete_dig(coords: Vector2i) -> void:
 	if dig_queue.has(coords):
 		dig_queue.erase(coords)
 	cell_dig_progress.erase(coords)
+	update_cell_navigation(coords)
 	cell_modified.emit(coords, Enums.CellType.AIR)
 
 func designate_chamber(coords: Vector2i, type: Enums.ChamberType) -> bool:
@@ -199,10 +209,53 @@ func flood_cells(row_start: int, row_end: int) -> void:
 			var pos: Vector2i = Vector2i(x, y)
 			if cell_data.get(pos, Enums.CellType.ROCK) == Enums.CellType.AIR:
 				cell_data[pos] = Enums.CellType.WATER
+				update_cell_navigation(pos)
 				cell_modified.emit(pos, Enums.CellType.WATER)
 
 func drain_cells() -> void:
 	for pos in cell_data.keys():
 		if cell_data[pos] == Enums.CellType.WATER:
 			cell_data[pos] = Enums.CellType.AIR
+			update_cell_navigation(pos)
 			cell_modified.emit(pos, Enums.CellType.AIR)
+
+func update_cell_navigation(coords: Vector2i) -> void:
+	if is_valid_coord(coords) and astar != null:
+		astar.set_point_solid(coords, not is_cell_walkable(coords))
+
+func get_path_between(start_cell: Vector2i, end_cell: Vector2i) -> Array[Vector2i]:
+	if not is_valid_coord(start_cell) or not is_valid_coord(end_cell):
+		return []
+
+	if astar.is_point_solid(start_cell):
+		return []
+
+	var target_cell: Vector2i = end_cell
+	if astar.is_point_solid(target_cell):
+		var best_neighbor: Vector2i = Vector2i(-1, -1)
+		var min_dist: float = 999999.0
+		var neighbors: Array[Vector2i] = [
+			Vector2i(end_cell.x + 1, end_cell.y),
+			Vector2i(end_cell.x - 1, end_cell.y),
+			Vector2i(end_cell.x, end_cell.y + 1),
+			Vector2i(end_cell.x, end_cell.y - 1)
+		]
+		for n in neighbors:
+			if is_valid_coord(n) and not astar.is_point_solid(n):
+				var d: float = Vector2(start_cell).distance_squared_to(Vector2(n))
+				if d < min_dist:
+					min_dist = d
+					best_neighbor = n
+		if best_neighbor == Vector2i(-1, -1):
+			return []
+		target_cell = best_neighbor
+
+	return astar.get_id_path(start_cell, target_cell)
+
+func get_world_path(start_cell: Vector2i, end_cell: Vector2i) -> Array[Vector2]:
+	var id_path: Array[Vector2i] = get_path_between(start_cell, end_cell)
+	var world_path: Array[Vector2] = []
+	for c in id_path:
+		world_path.append(grid_to_world(c))
+	return world_path
+
