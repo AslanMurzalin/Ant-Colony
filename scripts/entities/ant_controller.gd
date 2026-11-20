@@ -23,6 +23,7 @@ var walk_anim_timer: float = 0.0
 
 var target_food_source: FoodSource = null
 var target_feed_entity: Node2D = null
+var combat_attack_timer: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var job_badge: ColorRect = $JobBadge
@@ -332,8 +333,69 @@ func _find_nearest_food_storage() -> Vector2:
 
 
 func _tick_defend() -> void:
-	if state == Enums.AntState.IDLE:
-		request_job_transition()
+	match state:
+		Enums.AntState.IDLE:
+			request_job_transition()
+			if current_job != Enums.JobType.DEFEND:
+				return
+			
+			var threat_mgr: Node = get_node_or_null("/root/ThreatManager")
+			var best_threat: Node2D = null
+			if threat_mgr != null:
+				var threats: Array = threat_mgr.get("active_threats")
+				var min_dist: float = 999999.0
+				for t in threats:
+					if is_instance_valid(t):
+						var d: float = global_position.distance_squared_to(t.global_position)
+						if d < min_dist:
+							min_dist = d
+							best_threat = t
+			
+			if best_threat != null:
+				combat_target = best_threat
+				navigate_to(best_threat.global_position)
+				if path_waypoints.size() > 0:
+					set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+			else:
+				var patrol_pos: Vector2 = Vector2(976.0, 256.0)
+				if global_position.distance_to(patrol_pos) > 32.0:
+					navigate_to(patrol_pos)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+
+		Enums.AntState.TRAVELING_TO_TARGET:
+			if combat_target != null and is_instance_valid(combat_target):
+				var dist: float = global_position.distance_to(combat_target.global_position)
+				if dist <= 24.0:
+					path_waypoints.clear()
+					velocity = Vector2.ZERO
+					set_ant_state(Enums.AntState.WORKING)
+				else:
+					move_along_path(get_physics_process_delta_time())
+			else:
+				var reached: bool = move_along_path(get_physics_process_delta_time())
+				if reached:
+					set_ant_state(Enums.AntState.IDLE)
+
+		Enums.AntState.WORKING:
+			if combat_target == null or not is_instance_valid(combat_target):
+				combat_target = null
+				set_ant_state(Enums.AntState.IDLE)
+				return
+			
+			var dist: float = global_position.distance_to(combat_target.global_position)
+			if dist > 36.0:
+				navigate_to(combat_target.global_position)
+				set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+				return
+			
+			velocity = Vector2.ZERO
+			combat_attack_timer += get_physics_process_delta_time()
+			if combat_attack_timer >= 0.8:
+				combat_attack_timer = 0.0
+				if combat_target.has_method("take_damage"):
+					combat_target.call("take_damage", 6.0)
+
 
 func take_damage(amount: float) -> void:
 	health = maxf(0.0, health - amount)

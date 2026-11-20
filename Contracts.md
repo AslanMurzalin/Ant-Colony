@@ -489,10 +489,18 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
   - *Description:* Signals impending rain, initiates water accumulation in lower tunnels via `GridManager.flood_cells()`, and starts drainage timer.
 - `unregister_threat(threat_node: Node2D) -> void`
   - *Description:* Removes defeated enemy from `active_threats` and emits `threat_defeated`.
+- `_on_day_started(day_number: int) -> void`
+  - *Description:* Daily event handler that triggers schedule_threats_for_day on each day start.
+- `_process_threat_schedule(delta: float) -> void`
+  - *Description:* Updates timer countdowns for daily scheduled threat waves and issues advance alerts.
+- `_process_rain_flooding(delta: float) -> void`
+  - *Description:* Deals drowning damage to submerged ants during active rainstorms and drains water upon expiration.
+- `is_rain_active() -> bool`
+  - *Description:* Returns whether a rainstorm flooding event is currently underway.
 
 ---
 
-### 3.5 Enemy Entities (`BeetleController` / `SpiderController`)
+### 3.6 Enemy Entities (`BeetleController` / `SpiderController`)
 
 #### `BeetleController` (`res://scripts/threats/beetle_controller.gd`)
 - `health: float` = 80.0
@@ -503,6 +511,9 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
   - `find_highest_priority_target() -> Node2D`: Targets Foragers -> Entrance -> Food Store -> Queen.
   - `attack_target(target: Node2D, delta: float) -> void`
   - `take_damage(amount: float) -> void`
+  - `_process_beetle_behavior(delta: float) -> void`
+  - `_navigate_to_target(target_world_pos: Vector2) -> void`
+  - `_move_along_path(delta: float) -> void`
 
 #### `SpiderController` (`res://scripts/threats/spider_controller.gd`)
 - `health: float` = 30.0
@@ -512,6 +523,24 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
   - `patrol_surface(delta: float) -> void`
   - `ambush_forager(ant: AntController) -> void`
   - `flee_surface() -> void`
+  - `_process_flee(delta: float) -> void`
+  - `take_damage(amount: float) -> void`
+
+---
+
+### 3.7 Weather & Environment (`WeatherController`)
+
+#### `WeatherController` (`res://scripts/weather/weather_controller.gd`)
+- `is_raining: bool`
+- `rain_timer: float`
+- `rain_drops: Array[Vector2]`
+- `max_drops: int`
+- `sky_darkness: float`
+- **Methods:**
+  - `_on_rain_storm_started(duration: float) -> void`
+  - `_on_rain_storm_ended() -> void`
+  - `start_rain(duration: float) -> void`
+  - `stop_rain() -> void`
 
 ---
 
@@ -536,6 +565,22 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
 - **Methods:**
   - `show_summary(day: int, stats: Dictionary) -> void`
   - `on_continue_pressed() -> void`
+
+### 4.4 `ThreatAlertController` (`res://scripts/ui/threat_alert_controller.gd`)
+- **Properties:**
+  - `is_alert_active: bool`
+  - `alert_type: Enums.ThreatType`
+  - `alert_dir: Vector2`
+  - `alert_timer: float`
+  - `pulse_timer: float`
+- **Signals:**
+  - `alert_started(type: Enums.ThreatType, dir: Vector2)`
+  - `alert_ended()`
+- **Methods:**
+  - `show_alert(type: Enums.ThreatType, spawn_side: Vector2, duration: float) -> void`
+  - `hide_alert() -> void`
+  - `_on_threat_warning_issued(type: Enums.ThreatType, spawn_side: Vector2, time_until_spawn: float) -> void`
+  - `_on_threat_spawned(threat_node: Node2D) -> void`
 
 ---
 

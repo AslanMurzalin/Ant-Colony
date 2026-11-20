@@ -23,6 +23,7 @@ TaskAllocationManager="*res://scripts/core/task_allocation_manager.gd"
 ResourceManager="*res://scripts/core/resource_manager.gd"
 GridManager="*res://scripts/grid/grid_manager.gd"
 NurseryManager="*res://scripts/entities/nursery_manager.gd"
+ThreatManager="*res://scripts/threats/threat_manager.gd"
 
 [display]
 

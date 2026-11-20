@@ -136,12 +136,12 @@
 ## Phase 4: Threats & Combat
 
 ### [Session 4.1] Spider Threat (Surface Ambusher)
-- [ ] **Task 4.1A — Spider AI & Forager Ambush (Dev A)**
+- [x] **Task 4.1A — Spider AI & Forager Ambush (Dev A)**
   - **Goal:** Implement `spider_controller.gd`. Spawns on surface edge, patrols grass, and attacks nearest foraging ant.
   - **Deliverable:** Fast movement speed; chases foragers within detection radius; kills ant if caught before ant reaches tunnel entrance.
   - **Acceptance Criteria:** Spider retreats off-screen after killing 1 ant or after taking damage from Defender ants.
 
-- [ ] **Task 4.1B — Threat Warning Alert System (Dev B)**
+- [x] **Task 4.1B — Threat Warning Alert System (Dev B)**
   - **Goal:** Screen-edge warning arrows in UI (`threat_alert_controller.gd`).
   - **Deliverable:** Pulsing icon appears 8 seconds prior to spider/beetle arrival indicating inbound direction.
   - **Acceptance Criteria:** Alert points accurately toward the boundary where the enemy will enter the screen.
@@ -149,12 +149,12 @@
 ---
 
 ### [Session 4.2] Beetle Threat (Heavy Subsurface Intruder)
-- [ ] **Task 4.2A — Beetle Controller & Target Priority (Dev A)**
+- [x] **Task 4.2A — Beetle Controller & Target Priority (Dev A)**
   - **Goal:** Implement `beetle_controller.gd`. High HP (80), slow movement, attacks entrance -> food -> queen.
   - **Deliverable:** Tunnels into nest; attacks defenders, food chambers, and queen; takes damage from surrounding defender ants.
   - **Acceptance Criteria:** Requires 3+ defender ants to defeat without casualties; deals heavy damage to undefended Queen.
 
-- [ ] **Task 4.2B — Defender Ant Patrol & Combat Animations (Dev B)**
+- [x] **Task 4.2B — Defender Ant Patrol & Combat Animations (Dev B)**
   - **Goal:** Defender ant behavior and combat visuals.
   - **Deliverable:** Defenders gather at entrance or follow enemy; attack animations and damage numbers/white hit-flashes.
   - **Acceptance Criteria:** Setting Defend slider to 50% immediately routes idle ants to entrance choke point; engages beetle on sight.
@@ -162,12 +162,12 @@
 ---
 
 ### [Session 4.3] Rainstorm Environmental Event
-- [ ] **Task 4.3A — Rainstorm Flooding Logic (Dev A)**
+- [x] **Task 4.3A — Rainstorm Flooding Logic (Dev A)**
   - **Goal:** Rain hazard system. Submerges the bottom-most 3 rows of excavated tunnels in water for 30 seconds.
   - **Deliverable:** Ants submerged take drowning damage; food stored in flooded cells is lost (`ResourceManager.spoil_food`).
   - **Acceptance Criteria:** Water recedes after storm duration ends; drainage tunnels direct water away if dug by player.
 
-- [ ] **Task 4.3B — Weather Effects & Water Shaders (Dev B)**
+- [x] **Task 4.3B — Weather Effects & Water Shaders (Dev B)**
   - **Goal:** Surface rain particle system, sky darkening tween, and semi-transparent blue water fill in flooded cells.
   - **Deliverable:** Audio/visual warning before storm; rain sounds, water level rise and drain animation.
   - **Acceptance Criteria:** Clean visual distinction between safe dry tunnels and hazardous flooded tunnels.
