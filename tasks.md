@@ -177,12 +177,12 @@
 ## Phase 5: UI, 10-Day Loop & Final Polish
 
 ### [Session 5.1] HUD & Indirect Slider Controls
-- [ ] **Task 5.1A — Task Slider UI Widget (Dev A)**
+- [x] **Task 5.1A — Task Slider UI Widget (Dev A)**
   - **Goal:** 4 interactive sliders in bottom-left corner with headcount indicators (`Forage (12)`, `Dig (5)`, `Nurse (3)`, `Defend (10)`).
   - **Deliverable:** Connected to `TaskAllocationManager`; dragging one slider updates the others smoothly.
   - **Acceptance Criteria:** Sliders can be dragged or locked; live headcount updates as ants change jobs.
 
-- [ ] **Task 5.1B — Top Bar HUD & Speed Controls (Dev B)**
+- [x] **Task 5.1B — Top Bar HUD & Speed Controls (Dev B)**
   - **Goal:** Top HUD showing Day (1–10), Day progress bar, Food count (`X/Cap`), Ants alive (`X/50`), and Queen HP.
   - **Deliverable:** Pause, 1x, and 2x simulation speed toggle buttons (`Space` toggles pause).
   - **Acceptance Criteria:** Pausing allows moving sliders and marking dig orders; speed 2x accelerates time scale without physics glitches.
@@ -190,12 +190,12 @@
 ---
 
 ### [Session 5.2] 10-Day Progression & Run Generator
-- [ ] **Task 5.2A — Deterministic Seed Schedule (Dev A)**
+- [x] **Task 5.2A — Deterministic Seed Schedule (Dev A)**
   - **Goal:** Implement 10-day escalation curve in `ThreatManager` driven by random seed.
   - **Deliverable:** Day 1–2 easy; Day 3–4 first beetle; Day 5–6 rain; Day 7–8 twin beetles; Day 9–10 frost & swarm.
   - **Acceptance Criteria:** Running with identical seed produces identical enemy spawn timings and food positions.
 
-- [ ] **Task 5.2B — Day Summary & Victory/Defeat Screens (Dev B)**
+- [x] **Task 5.2B — Day Summary & Victory/Defeat Screens (Dev B)**
   - **Goal:** Build end-of-day summary dialog and final victory/defeat modal cards.
   - **Deliverable:** Displays ants born, ants lost, food gathered; calculates final rank ("Fledgling", "Healthy", "Thriving Colony").
   - **Acceptance Criteria:** Reaching end of Day 10 with Queen alive triggers Victory screen with restart button.
@@ -203,12 +203,12 @@
 ---
 
 ### [Session 5.3] Balance Pass, Sound & Integration Polish
-- [ ] **Task 5.3A — Economy & Combat Balancing (Dev A)**
+- [x] **Task 5.3A — Economy & Combat Balancing (Dev A)**
   - **Goal:** Fine-tune numbers: Queen hunger frequency, dig speeds, ant walk speed, beetle HP, and food respawn rates.
   - **Deliverable:** Run feels challenging but fair; requires strategic slider balancing between foraging and defense.
   - **Acceptance Criteria:** Full 10-day playthrough completed under 25 minutes without deadlock or unwinnable states.
 
-- [ ] **Task 5.3B — Audio, SFX & Visual Juice (Dev B)**
+- [x] **Task 5.3B — Audio, SFX & Visual Juice (Dev B)**
   - **Goal:** Add ambient underground rumble, ant footstep ticks, dig chomp SFX, alert sirens, and victory fanfare.
   - **Deliverable:** Audio buses for SFX and Music; screen shake when beetles strike walls.
   - **Acceptance Criteria:** Game feels tactile, charming, and polished; volume sliders in pause menu.

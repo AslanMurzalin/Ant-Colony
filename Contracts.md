@@ -640,10 +640,208 @@ Root orchestrator in `res://scenes/main/main.tscn`.
 
 ---
 
-## 6. Contract Checklist for New Code
+## 6. Phase 5 — UI, 10-Day Loop & Final Polish
+
+---
+
+### 6.1 `TaskSliderWidget` (`res://scripts/ui/task_slider_widget.gd`)
+Bottom-left HUD with 4 sliders for indirect ant job allocation.
+
+#### Signals
+- `slider_changed(job: Enums.JobType, new_pct: float)` — emitted after a slider drag is processed.
+
+#### Properties
+- `_locked: Dictionary` — per-job lock flags (prevents redistribution into this job).
+- `_sliders: Dictionary` — `Enums.JobType → HSlider` node refs.
+- `_labels: Dictionary` — `Enums.JobType → Label` node refs.
+- `_lock_btns: Dictionary` — `Enums.JobType → Button` node refs.
+- `_updating: bool` — guard flag to prevent re-entrant slider updates.
+
+#### Methods
+- `_build_ui() -> void`
+  - *Description:* Programmatically constructs one HBoxContainer row per job with swatch, label, slider, and lock button.
+- `_on_slider_changed(job: Enums.JobType, value: float) -> void`
+  - *Description:* Called when user drags a slider; delegates to `TaskAllocationManager.set_task_percentage()`, syncs all sliders, refreshes labels.
+- `_on_lock_toggled(job: Enums.JobType, pressed: bool) -> void`
+  - *Description:* Marks a slider locked/unlocked; updates button icon.
+- `_on_quotas_updated() -> void`
+  - *Description:* Listener for `TaskAllocationManager.quotas_updated` — re-syncs sliders without triggering TAM again.
+- `_sync_sliders_from_tam() -> void`
+  - *Description:* Reads percentages from TAM and writes them to slider `.value` without triggering `_on_slider_changed`.
+- `_refresh_labels() -> void`
+  - *Description:* Updates each label to `"JobName (N)"` headcount format based on current TAM percentages × `GameManager.total_workers_alive`.
+- `set_slider_value(job: Enums.JobType, pct: float) -> void`
+  - *Description:* Programmatic setter (clamped 0.0–1.0) for tutorial or preset buttons.
+
+---
+
+### 6.2 `TopBarHUD` (`res://scripts/ui/top_bar_hud.gd`)
+Top HUD strip — Day, day progress bar, Food, Ants alive, Queen HP, speed buttons.
+
+#### Constants
+- `SPEED_PAUSE: float = 0.0`
+- `SPEED_1X: float = 1.0`
+- `SPEED_2X: float = 2.0`
+
+#### Methods
+- `_set_speed(speed: float) -> void`
+  - *Description:* Calls `GameManager.set_game_speed(speed)` and refreshes button modulate states.
+- `_toggle_pause() -> void`
+  - *Description:* Toggles between `SPEED_PAUSE` and `SPEED_1X`; bound to `Space` key.
+- `_update_speed_buttons(speed: float) -> void`
+  - *Description:* Highlights the active speed button, grays out others.
+- `_on_day_started(day: int) -> void`
+  - *Description:* Updates `_day_label` text and resets `_day_bar` to 0.
+- `_on_day_progress(pct: float) -> void`
+  - *Description:* Sets `_day_bar.value = pct * 100` and refreshes Queen HP.
+- `_on_food_changed(current: int, capacity: int) -> void`
+  - *Description:* Updates food label to `"Food: X / Y"`.
+- `_on_ant_count_changed(alive: int, _max: int) -> void`
+  - *Description:* Updates ants label to `"Ants: X / 50"`.
+- `_refresh_all() -> void`
+  - *Description:* Full refresh of all HUD elements; called in `_ready()`.
+- `_refresh_queen_hp() -> void`
+  - *Description:* Queries first node in group `"queen"` for `get_health_pct()` and sets `_queen_hp_bar.value`.
+
+---
+
+### 6.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)
+Between-day modal showing stats; also hosts Victory and Defeat panels.
+
+#### Signals
+- `continue_pressed()` — emitted when the continue button is pressed on the day summary.
+
+#### Methods
+- `_on_day_ended(day: int, stats: Dictionary) -> void`
+  - *Description:* Populates the modal with ants born/lost, food gathered, day rating badge; shows the panel (skips if game is in VICTORY/DEFEAT state).
+- `_on_continue_pressed() -> void`
+  - *Description:* Hides panel, emits `continue_pressed`, calls `GameManager.start_next_day()`.
+- `_day_rating(stats: Dictionary) -> String`
+  - *Description:* Returns `"⭐⭐⭐  Excellent!"`, `"⭐⭐  Good"`, `"⭐  Struggled"`, or `"☠  Heavy Losses"` based on `ants_lost` count.
+- `show_victory(rating: String, final_stats: Dictionary) -> void`
+  - *Description:* Repurposes panel for Victory state: shows rating and total ants alive; swaps continue button to restart.
+- `show_defeat(reason: String) -> void`
+  - *Description:* Repurposes panel for Defeat state: shows collapse reason; swaps continue button to restart.
+- `_on_restart_pressed() -> void`
+  - *Description:* Hides panel and calls `GameManager.start_new_run()`.
+
+---
+
+### 6.4 `BalanceConstants` (`res://scripts/core/balance_constants.gd`)
+Single source of truth for all tunable gameplay numbers (no logic, constants only).
+
+#### Constants
+- `QUEEN_MAX_HEALTH: float = 100.0`
+- `QUEEN_HUNGER_INTERVAL: float = 15.0`
+- `QUEEN_STARVATION_DAMAGE: float = 2.0`
+- `QUEEN_EGG_INTERVAL: float = 20.0`
+- `ANT_WALK_SPEED: float = 45.0`
+- `ANT_DIG_DURATION: float = 2.5`
+- `ANT_ATTACK_DAMAGE: float = 6.0`
+- `ANT_ATTACK_COOLDOWN: float = 0.8`
+- `ANT_MAX_POPULATION: int = 50`
+- `FOOD_BURN_RATE_PER_ANT: float = 0.0008`
+- `FOOD_RESPAWN_INTERVAL: float = 30.0`
+- `FOOD_NEAR_UNITS: int = 6`
+- `FOOD_FAR_UNITS: int = 14`
+- `EGG_INCUBATION_SECONDS: float = 25.0`
+- `LARVA_FOOD_REQUIRED: int = 2`
+- `SPIDER_HP: float = 30.0`
+- `SPIDER_SPEED: float = 60.0`
+- `SPIDER_DETECT_RADIUS: float = 180.0`
+- `SPIDER_DAMAGE: float = 12.0`
+- `BEETLE_HP: float = 80.0`
+- `BEETLE_SPEED: float = 18.0`
+- `BEETLE_DAMAGE: float = 8.0`
+- `RAIN_FLOOD_ROWS: int = 3`
+- `RAIN_DURATION_SECONDS: float = 30.0`
+- `RAIN_DROWN_DAMAGE: float = 5.0`
+- `DAY_DURATION_SECONDS: float = 150.0`
+
+---
+
+### 6.5 `AudioController` (`res://scripts/ui/audio_controller.gd`)
+Manages SFX and Music audio buses, screen shake, and volume settings.
+
+#### Properties
+- `_camera: Camera2D` — reference to camera node for screen shake.
+- `_shake_intensity: float` — current shake pixel magnitude.
+- `_shake_duration: float` — remaining shake seconds.
+- `sfx_volume_db: float` — current SFX bus volume in dB.
+- `music_volume_db: float` — current Music bus volume in dB.
+
+#### Methods
+- `play_dig_sfx() -> void`
+  - *Description:* Plays the dig chomp one-shot audio player.
+- `play_step_sfx() -> void`
+  - *Description:* Plays the ant footstep tick at reduced volume; only if not already playing.
+- `trigger_screen_shake(intensity: float, duration: float) -> void`
+  - *Description:* Sets shake intensity/duration; `_tick_screen_shake` applies random camera offset each frame until duration elapses.
+- `set_sfx_volume(linear: float) -> void`
+  - *Description:* Converts 0.0–1.0 linear value to dB and applies to `"SFX"` audio bus.
+- `set_music_volume(linear: float) -> void`
+  - *Description:* Converts 0.0–1.0 linear value to dB and applies to `"Music"` audio bus.
+- `_connect_signals() -> void`
+  - *Description:* Connects to `ThreatManager.threat_warning_issued`, `rain_started`, `rain_stopped`, and `GameManager.game_won`.
+- `_on_threat_warning(_direction: int) -> void`
+  - *Description:* Plays alert siren SFX.
+- `_on_rain_started() -> void`
+  - *Description:* Plays rain ambient SFX.
+- `_on_rain_stopped() -> void`
+  - *Description:* Stops rain SFX player if currently playing.
+- `_play_sfx(player: AudioStreamPlayer) -> void`
+  - *Description:* Generic helper — sets volume_db and calls `.play()` if stream is not null.
+- `_tick_screen_shake(delta: float) -> void`
+  - *Description:* Called every frame; applies random offset to `_camera` while `_shake_duration > 0`.
+- `_setup_audio_buses() -> void`
+  - *Description:* Ensures `"SFX"` and `"Music"` buses exist in `AudioServer`; sets initial volumes.
+
+---
+
+### 6.6 `PauseMenu` (`res://scripts/ui/pause_menu.gd`)
+Escape-key pause overlay with SFX/Music volume sliders and quit button.
+
+#### Methods
+- `_toggle() -> void`
+  - *Description:* Shows pause menu (pauses game) or hides it (resumes at 1×).
+- `_on_resume_pressed() -> void`
+  - *Description:* Hides the panel and calls `GameManager.set_game_speed(1.0)`.
+- `_on_sfx_changed(value: float) -> void`
+  - *Description:* Calls `AudioController.set_sfx_volume(value / 100.0)`.
+- `_on_music_changed(value: float) -> void`
+  - *Description:* Calls `AudioController.set_music_volume(value / 100.0)`.
+
+---
+
+### 6.7 Additions to `GameManager` (Phase 5)
+
+#### New Signals
+- `day_progress_ticked(elapsed_ratio: float)` — alias of `day_time_updated`; consumed by `TopBarHUD`.
+- `ant_count_changed(alive: int, maximum: int)` — emitted by `register_ant_born()` and `register_ant_died()`.
+
+#### New Methods
+- `register_ant_born() -> void`
+  - *Description:* Increments `total_workers_alive` and `ants_born_today`; emits `ant_count_changed`.
+- `register_ant_died() -> void`
+  - *Description:* Decrements `total_workers_alive` (floor 0) and increments `ants_lost_today`; emits `ant_count_changed`.
+
+---
+
+### 6.8 Additions to `QueenController` (Phase 5)
+
+#### New Methods
+- `get_health_pct() -> float`
+  - *Description:* Returns `current_health / max_health` clamped to `[0.0, 1.0]`; used by `TopBarHUD._refresh_queen_hp()`.
+
+---
+
+## 7. Contract Checklist for New Code
 
 Whenever any new script or function is created in this project, the author MUST ensure:
 1. The function signature, parameters, and return types are documented in this file (`Contracts.md`).
+2. Signals emitted and invariants are documented.
+3. Class belongs to a designated layer (Autoload, Entity, Grid, Threat, UI).
+4. No direct hard coupling bypasses manager singletons.
 2. Signals emitted and invariants are documented.
 3. Class belongs to a designated layer (Autoload, Entity, Grid, Threat, UI).
 4. No direct hard coupling bypasses manager singletons.

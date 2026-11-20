@@ -108,3 +108,10 @@ func attempt_lay_egg() -> void:
 		var nursery = get_node_or_null("/root/NurseryManager")
 		if nursery != null and nursery.has_method("spawn_egg"):
 			nursery.spawn_egg(spawn_pos)
+
+
+## Returns current health as 0.0–1.0 ratio for HUD display.
+func get_health_pct() -> float:
+	if max_health <= 0.0:
+		return 0.0
+	return clampf(current_health / max_health, 0.0, 1.0)

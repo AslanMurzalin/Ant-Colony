@@ -1,0 +1,62 @@
+[gd_scene format=3 uid="uid://day_summary_controller"]
+
+[node name="DaySummaryController" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource("res://scripts/ui/day_summary_controller.gd")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.55)
+mouse_filter = 0
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -160.0
+offset_right = 180.0
+offset_bottom = 160.0
+
+[node name="VBox" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="Panel/VBox"]
+text = "Day Complete!"
+theme_override_font_sizes/font_size = 22
+horizontal_alignment = 1
+
+[node name="HSep1" type="HSeparator" parent="Panel/VBox"]
+
+[node name="StatsBox" type="VBoxContainer" parent="Panel/VBox"]
+theme_override_constants/separation = 6
+
+[node name="BornLabel" type="Label" parent="Panel/VBox/StatsBox"]
+text = "Ants born: 0"
+
+[node name="LostLabel" type="Label" parent="Panel/VBox/StatsBox"]
+text = "Ants lost: 0"
+
+[node name="FoodLabel" type="Label" parent="Panel/VBox/StatsBox"]
+text = "Food gathered: 0"
+
+[node name="HSep2" type="HSeparator" parent="Panel/VBox"]
+
+[node name="RatingLabel" type="Label" parent="Panel/VBox"]
+text = "⭐⭐⭐  Excellent!"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="ContinueBtn" type="Button" parent="Panel/VBox"]
+text = "Day 2 →"
+size_flags_horizontal = 4

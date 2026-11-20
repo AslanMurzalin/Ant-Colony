@@ -5,10 +5,12 @@ extends Node
 
 signal day_started(day_number: int)
 signal day_time_updated(elapsed_ratio: float)
+signal day_progress_ticked(elapsed_ratio: float)   ## alias used by TopBarHUD
 signal day_ended(day_number: int, stats: Dictionary)
 signal game_speed_changed(new_speed: float)
 signal game_over(reason: String)
 signal game_won(rating: String, final_stats: Dictionary)
+signal ant_count_changed(alive: int, maximum: int)
 
 var current_day: int = 1
 var day_duration_seconds: float = 150.0
@@ -29,6 +31,7 @@ func _process(delta: float) -> void:
 		day_timer += delta
 		var elapsed_ratio: float = clampf(day_timer / day_duration_seconds, 0.0, 1.0)
 		day_time_updated.emit(elapsed_ratio)
+		day_progress_ticked.emit(elapsed_ratio)
 		if day_timer >= day_duration_seconds:
 			advance_day()
 
@@ -106,3 +109,17 @@ func calculate_end_rating() -> String:
 		return "Healthy"
 	else:
 		return "Fledgling"
+
+
+## Called by NurseryManager when a new ant hatches.
+func register_ant_born() -> void:
+	total_workers_alive += 1
+	ants_born_today += 1
+	ant_count_changed.emit(total_workers_alive, 50)
+
+
+## Called by AntController on death.
+func register_ant_died() -> void:
+	total_workers_alive = max(0, total_workers_alive - 1)
+	ants_lost_today += 1
+	ant_count_changed.emit(total_workers_alive, 50)
