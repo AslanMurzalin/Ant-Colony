@@ -13,5 +13,5 @@ script = ExtResource("1_beetle")
 shape = SubResource("CircleShape2D_beetle")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(0.08, 0.08)
+scale = Vector2(0.65, 0.65)
 texture = ExtResource("2_texture")

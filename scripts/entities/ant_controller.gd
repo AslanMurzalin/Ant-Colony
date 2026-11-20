@@ -409,22 +409,29 @@ func take_damage(amount: float) -> void:
 
 func update_job_visuals() -> void:
 	var badge_color: Color = Color(0.8, 0.8, 0.8, 1.0)
+	var tex_path: String = "res://assets/sprites_topdown/worker_forager.png"
 	match current_job:
 		Enums.JobType.FORAGE:
 			badge_color = Color(0.55, 0.35, 0.17, 1.0) # Brown
+			tex_path = "res://assets/sprites_topdown/worker_forager.png"
 		Enums.JobType.DIG:
 			badge_color = Color(0.9, 0.5, 0.13, 1.0) # Orange
+			tex_path = "res://assets/sprites_topdown/worker_digger.png"
 		Enums.JobType.NURSE:
 			badge_color = Color(0.18, 0.8, 0.44, 1.0) # Green
+			tex_path = "res://assets/sprites_topdown/worker_nurse.png"
 		Enums.JobType.DEFEND:
 			badge_color = Color(0.9, 0.3, 0.24, 1.0) # Red
+			tex_path = "res://assets/sprites_topdown/worker_defender.png"
 		_:
 			badge_color = Color(0.7, 0.7, 0.7, 1.0)
 	
 	if job_badge != null:
 		job_badge.color = badge_color
 	if sprite != null:
-		sprite.modulate = badge_color
+		if ResourceLoader.exists(tex_path):
+			sprite.texture = load(tex_path)
+		sprite.modulate = Color.WHITE
 
 func update_cargo_visuals() -> void:
 	if cargo_node == null:

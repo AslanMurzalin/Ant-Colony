@@ -12,9 +12,14 @@ signal food_depleted()
 @export var is_depleted: bool = false
 
 @onready var count_label: Label = $CountLabel
+@onready var sprite: Sprite2D = get_node_or_null("Sprite2D") as Sprite2D
 
 func _ready() -> void:
 	initial_units = food_units
+	if sprite != null and initial_units > 10:
+		var apple_tex_path: String = "res://assets/sprites_topdown/food_apple.png"
+		if ResourceLoader.exists(apple_tex_path):
+			sprite.texture = load(apple_tex_path)
 	_update_display()
 
 func harvest_unit() -> int:
@@ -41,8 +46,9 @@ func _update_display() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	# Draw food icon representation based on amount
-	var base_radius: float = 6.0 if initial_units <= 10 else 10.0
-	var col: Color = Color(0.95, 0.76, 0.19) if initial_units <= 10 else Color(0.85, 0.35, 0.25)
-	draw_circle(Vector2.ZERO, base_radius, col)
-	draw_circle(Vector2.ZERO, base_radius + 1.0, col.darkened(0.3), false, 1.5)
+	if sprite == null:
+		# Draw food icon representation based on amount
+		var base_radius: float = 6.0 if initial_units <= 10 else 10.0
+		var col: Color = Color(0.95, 0.76, 0.19) if initial_units <= 10 else Color(0.85, 0.35, 0.25)
+		draw_circle(Vector2.ZERO, base_radius, col)
+		draw_circle(Vector2.ZERO, base_radius + 1.0, col.darkened(0.3), false, 1.5)

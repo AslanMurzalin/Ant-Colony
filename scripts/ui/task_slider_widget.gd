@@ -20,6 +20,13 @@ const SLIDER_COLORS: Dictionary = {
 	Enums.JobType.DEFEND: Color(0.85, 0.15, 0.15),
 }
 
+const JOB_ICONS: Dictionary = {
+	Enums.JobType.FORAGE: "res://assets/ui/icon_forage.png",
+	Enums.JobType.DIG:    "res://assets/ui/icon_dig.png",
+	Enums.JobType.NURSE:  "res://assets/ui/icon_nurse.png",
+	Enums.JobType.DEFEND: "res://assets/ui/icon_defend.png",
+}
+
 ## Whether a particular slider is locked from redistribution.
 var _locked: Dictionary = {
 	Enums.JobType.FORAGE: false,
@@ -49,10 +56,19 @@ func _build_ui() -> void:
 		var row: HBoxContainer = HBoxContainer.new()
 		row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
+		# Icon from sprite sheet
+		var icon_rect: TextureRect = TextureRect.new()
+		icon_rect.custom_minimum_size = Vector2(24, 24)
+		icon_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		if JOB_ICONS.has(job) and ResourceLoader.exists(JOB_ICONS[job]):
+			icon_rect.texture = load(JOB_ICONS[job])
+		row.add_child(icon_rect)
+
 		# Color swatch
 		var swatch: ColorRect = ColorRect.new()
 		swatch.color = SLIDER_COLORS[job]
-		swatch.custom_minimum_size = Vector2(8, 32)
+		swatch.custom_minimum_size = Vector2(6, 28)
 		row.add_child(swatch)
 
 		# Label "Forage (12)"

@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=11 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/economy/food_spawner.gd" id="6_spawner"]
 [ext_resource type="Script" path="res://scripts/weather/weather_controller.gd" id="7_weather"]
 [ext_resource type="Script" path="res://scripts/ui/threat_alert_controller.gd" id="8_alert"]
+[ext_resource type="Texture2D" path="res://assets/sprites_topdown/anthill_entrance.png" id="9_entrance"]
+[ext_resource type="Texture2D" path="res://assets/sprites_topdown/tree_stump.png" id="10_stump"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -26,7 +28,17 @@ offset_left = -400.0
 offset_top = 200.0
 offset_right = 2400.0
 offset_bottom = 256.0
-color = Color(0.416, 0.659, 0.31, 1)
+color = Color(0.678, 0.690, 0.270, 1)
+
+[node name="TreeStump" type="Sprite2D" parent="Background"]
+position = Vector2(1300, 205)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("10_stump")
+
+[node name="AnthillEntrance" type="Sprite2D" parent="Background"]
+position = Vector2(976, 230)
+scale = Vector2(0.8, 0.8)
+texture = ExtResource("9_entrance")
 
 [node name="GridView" type="Node2D" parent="."]
 script = ExtResource("3_gridview")

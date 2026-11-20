@@ -78,3 +78,9 @@ func _draw() -> void:
 	var points: PackedVector2Array = PackedVector2Array([p1, p2, p3])
 	draw_colored_polygon(points, col)
 	draw_polyline(PackedVector2Array([p1, p2, p3, p1]), Color(1, 1, 1, alpha), 2.0)
+
+	var icon_path: String = "res://assets/ui/icon_skull.png" if alert_type == Enums.ThreatType.BEETLE else "res://assets/ui/icon_warning.png"
+	if ResourceLoader.exists(icon_path):
+		var icon_tex: Texture2D = load(icon_path)
+		if icon_tex != null:
+			draw_texture(icon_tex, center_pos + Vector2(-icon_tex.get_width() * 0.5, -45.0), Color(1, 1, 1, alpha))
