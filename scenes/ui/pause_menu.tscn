@@ -1,11 +1,14 @@
-[gd_scene format=3 uid="uid://pause_menu"]
+[gd_scene load_steps=2 format=3 uid="uid://pause_menu"]
+
+[ext_resource type="Script" path="res://scripts/ui/pause_menu.gd" id="1_script"]
 
 [node name="PauseMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-script = ExtResource("res://scripts/ui/pause_menu.gd")
+mouse_filter = 2
+script = ExtResource("1_script")
 
 [node name="ColorRect" type="ColorRect" parent="."]
 layout_mode = 1
@@ -32,40 +35,51 @@ layout_mode = 2
 theme_override_constants/separation = 14
 
 [node name="TitleLabel" type="Label" parent="Panel/VBox"]
+layout_mode = 2
 text = "⏸  Paused"
 theme_override_font_sizes/font_size = 20
 horizontal_alignment = 1
 
 [node name="HSep" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
 
 [node name="SFXRow" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
 
 [node name="SFXLabel" type="Label" parent="Panel/VBox/SFXRow"]
+layout_mode = 2
 text = "SFX"
 custom_minimum_size = Vector2(60, 0)
 
 [node name="SFXSlider" type="HSlider" parent="Panel/VBox/SFXRow"]
+layout_mode = 2
 min_value = 0.0
 max_value = 100.0
 value = 100.0
 size_flags_horizontal = 3
 
 [node name="MusicRow" type="HBoxContainer" parent="Panel/VBox"]
+layout_mode = 2
 
 [node name="MusicLabel" type="Label" parent="Panel/VBox/MusicRow"]
+layout_mode = 2
 text = "Music"
 custom_minimum_size = Vector2(60, 0)
 
 [node name="MusicSlider" type="HSlider" parent="Panel/VBox/MusicRow"]
+layout_mode = 2
 min_value = 0.0
 max_value = 100.0
 value = 70.0
 size_flags_horizontal = 3
 
 [node name="HSep2" type="HSeparator" parent="Panel/VBox"]
+layout_mode = 2
 
 [node name="ResumeBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
 text = "▶  Resume"
 
 [node name="QuitBtn" type="Button" parent="Panel/VBox"]
+layout_mode = 2
 text = "Quit"

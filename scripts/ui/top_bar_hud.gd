@@ -8,14 +8,14 @@ const SPEED_PAUSE: float = 0.0
 const SPEED_1X:    float = 1.0
 const SPEED_2X:    float = 2.0
 
-@onready var _day_label:       Label       = $HBoxContainer/DayLabel
-@onready var _day_bar:         ProgressBar = $HBoxContainer/DayBar
-@onready var _food_label:      Label       = $HBoxContainer/FoodLabel
-@onready var _ants_label:      Label       = $HBoxContainer/AntsLabel
-@onready var _queen_hp_bar:    ProgressBar = $HBoxContainer/QueenHPBar
-@onready var _btn_pause:       Button      = $HBoxContainer/SpeedButtons/BtnPause
-@onready var _btn_1x:          Button      = $HBoxContainer/SpeedButtons/Btn1x
-@onready var _btn_2x:          Button      = $HBoxContainer/SpeedButtons/Btn2x
+@onready var _day_label:       Label       = $PanelContainer/HBoxContainer/DayLabel
+@onready var _day_bar:         ProgressBar = $PanelContainer/HBoxContainer/DayBar
+@onready var _food_label:      Label       = $PanelContainer/HBoxContainer/FoodLabel
+@onready var _ants_label:      Label       = $PanelContainer/HBoxContainer/AntsLabel
+@onready var _queen_hp_bar:    ProgressBar = $PanelContainer/HBoxContainer/QueenHPBar
+@onready var _btn_pause:       Button      = $PanelContainer/HBoxContainer/SpeedButtons/BtnPause
+@onready var _btn_1x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn1x
+@onready var _btn_2x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn2x
 
 
 func _ready() -> void:

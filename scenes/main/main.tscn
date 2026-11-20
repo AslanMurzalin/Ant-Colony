@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=14 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -8,6 +8,11 @@
 [ext_resource type="Script" path="res://scripts/economy/food_spawner.gd" id="6_spawner"]
 [ext_resource type="Script" path="res://scripts/weather/weather_controller.gd" id="7_weather"]
 [ext_resource type="Script" path="res://scripts/ui/threat_alert_controller.gd" id="8_alert"]
+[ext_resource type="PackedScene" path="res://scenes/ui/top_bar_hud.tscn" id="9_topbar"]
+[ext_resource type="PackedScene" path="res://scenes/ui/task_slider_widget.tscn" id="10_sliders"]
+[ext_resource type="PackedScene" path="res://scenes/ui/day_summary_controller.tscn" id="11_summary"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="12_pause"]
+[ext_resource type="PackedScene" path="res://scenes/ui/audio_controller.tscn" id="13_audio"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -49,7 +54,19 @@ position = Vector2(976, 528)
 position = Vector2(960, 540)
 script = ExtResource("2_camera")
 
+[node name="UILayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="TopBarHUD" parent="UILayer" instance=ExtResource("9_topbar")]
+
+[node name="TaskSliderWidget" parent="UILayer" instance=ExtResource("10_sliders")]
+
+[node name="DaySummaryController" parent="UILayer" instance=ExtResource("11_summary")]
+
+[node name="PauseMenu" parent="UILayer" instance=ExtResource("12_pause")]
+
 [node name="ThreatAlertUI" type="CanvasLayer" parent="."]
+layer = 11
 
 [node name="ThreatAlertController" type="Control" parent="ThreatAlertUI"]
 layout_mode = 3
@@ -58,4 +75,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("8_alert")
+
+[node name="AudioController" parent="." instance=ExtResource("13_audio")]

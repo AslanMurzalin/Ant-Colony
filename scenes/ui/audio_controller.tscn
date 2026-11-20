@@ -1,28 +1,30 @@
-[gd_scene format=3 uid="uid://audio_controller"]
+[gd_scene load_steps=2 format=3 uid="uid://audio_controller"]
+
+[ext_resource type="Script" path="res://scripts/ui/audio_controller.gd" id="1_script"]
 
 [node name="AudioController" type="Node"]
-script = ExtResource("res://scripts/ui/audio_controller.gd")
+script = ExtResource("1_script")
 
 [node name="Ambient" type="AudioStreamPlayer" parent="."]
-bus = "Music"
+bus = &"Music"
 autoplay = false
 
 [node name="SfxDig" type="AudioStreamPlayer" parent="."]
-bus = "SFX"
+bus = &"SFX"
 autoplay = false
 
 [node name="SfxAlert" type="AudioStreamPlayer" parent="."]
-bus = "SFX"
+bus = &"SFX"
 autoplay = false
 
 [node name="SfxRain" type="AudioStreamPlayer" parent="."]
-bus = "SFX"
+bus = &"SFX"
 autoplay = false
 
 [node name="SfxStep" type="AudioStreamPlayer" parent="."]
-bus = "SFX"
+bus = &"SFX"
 autoplay = false
 
 [node name="SfxWin" type="AudioStreamPlayer" parent="."]
-bus = "SFX"
+bus = &"SFX"
 autoplay = false
