@@ -1,0 +1,47 @@
+[gd_scene load_steps=2 format=3 uid="uid://build_menu_controller"]
+
+[ext_resource type="Script" path="res://scripts/ui/build_menu_controller.gd" id="1_script"]
+
+[node name="BuildMenuController" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -52.0
+offset_right = -8.0
+offset_bottom = -8.0
+
+[node name="HBox" type="HBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BtnDig" type="Button" parent="Panel/HBox"]
+layout_mode = 2
+text = "⛏ Dig"
+tooltip_text = "Mark cells for excavation [1]"
+
+[node name="BtnCancel" type="Button" parent="Panel/HBox"]
+layout_mode = 2
+text = "✕ Cancel"
+tooltip_text = "Cancel dig order [2]"
+
+[node name="BtnNursery" type="Button" parent="Panel/HBox"]
+layout_mode = 2
+text = "🥚 Nursery"
+tooltip_text = "Designate nursery chamber [3]"
+
+[node name="BtnFoodStore" type="Button" parent="Panel/HBox"]
+layout_mode = 2
+text = "🍞 Storage"
+tooltip_text = "Designate food storage [4]"

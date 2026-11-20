@@ -10,6 +10,9 @@ signal colony_starving()
 var stored_food: int = 10
 var base_storage_capacity: int = 20
 var extra_capacity_per_store: int = 15
+var food_capacity: int:
+	get:
+		return get_max_capacity()
 var food_burn_timer: float = 0.0
 
 func _ready() -> void:

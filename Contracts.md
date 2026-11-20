@@ -128,6 +128,8 @@ Controls the indirect slider-based task distribution. Enforces that percentages 
   - *Description:* Returns whether a job slider is currently locked.
 - `get_job_percentage(job: Enums.JobType) -> float`
   - *Description:* Returns current target percentage (0.0 to 1.0) for a given job.
+- `get_task_percentage(job: Enums.JobType) -> float`
+  - *Description:* Alias for `get_job_percentage(job)` returning current target percentage for a given job.
 - `get_job_target_count(job: Enums.JobType) -> int`
   - *Description:* Returns target headcount quota for a given job.
 - `get_job_current_count(job: Enums.JobType) -> int`

@@ -23,6 +23,7 @@ var music_volume_db: float = -6.0
 
 
 func _ready() -> void:
+	add_to_group("audio_controller")
 	_setup_audio_buses()
 	_connect_signals()
 	# Start ambient rumble loop
@@ -44,11 +45,11 @@ func _connect_signals() -> void:
 	GameManager.connect("game_over",  func(_reason) -> void: pass)
 
 
-func _on_threat_warning(_direction: int) -> void:
+func _on_threat_warning(_threat_type = null, _spawn_side = null, _time = null) -> void:
 	_play_sfx(_sfx_alert)
 
 
-func _on_rain_started() -> void:
+func _on_rain_started(_duration: float = 0.0) -> void:
 	_play_sfx(_sfx_rain)
 
 

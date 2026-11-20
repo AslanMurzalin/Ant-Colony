@@ -23,6 +23,7 @@ var distress_timer: float = 0.0
 @onready var health_bar: ProgressBar = $HealthBar
 
 func _ready() -> void:
+	add_to_group("queen")
 	current_health = max_health
 	hunger_timer = hunger_interval
 	egg_laying_timer = egg_laying_interval

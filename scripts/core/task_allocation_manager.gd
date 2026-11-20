@@ -5,6 +5,7 @@ extends Node
 
 signal task_percentages_updated(percentages: Dictionary)
 signal job_assignments_changed(current_counts: Dictionary, target_counts: Dictionary)
+signal quotas_updated()
 
 var target_percentages: Dictionary = {
 	Enums.JobType.FORAGE: 0.25,
@@ -45,6 +46,9 @@ func is_slider_locked(job: Enums.JobType) -> bool:
 
 func get_job_percentage(job: Enums.JobType) -> float:
 	return target_percentages.get(job, 0.0)
+
+func get_task_percentage(job: Enums.JobType) -> float:
+	return get_job_percentage(job)
 
 func get_job_target_count(job: Enums.JobType) -> int:
 	return target_job_counts.get(job, 0)
@@ -104,12 +108,14 @@ func set_task_percentage(job: Enums.JobType, new_value: float) -> void:
 			target_percentages[j] = target_percentages[j] / final_sum
 
 	task_percentages_updated.emit(target_percentages)
+	quotas_updated.emit()
 
 func recalculate_job_targets(total_ants: int) -> void:
 	if total_ants <= 0:
 		for j in target_job_counts.keys():
 			target_job_counts[j] = 0
 		job_assignments_changed.emit(current_job_counts, target_job_counts)
+		quotas_updated.emit()
 		return
 
 	var jobs: Array[Enums.JobType] = [
@@ -148,6 +154,7 @@ func recalculate_job_targets(total_ants: int) -> void:
 		target_job_counts[j] = int_parts[j]
 
 	job_assignments_changed.emit(current_job_counts, target_job_counts)
+	quotas_updated.emit()
 
 func request_job_for_ant(ant: AntController) -> Enums.JobType:
 	var highest_deficit: int = -9999
@@ -171,7 +178,9 @@ func request_job_for_ant(ant: AntController) -> Enums.JobType:
 func register_ant(job: Enums.JobType) -> void:
 	current_job_counts[job] = current_job_counts.get(job, 0) + 1
 	job_assignments_changed.emit(current_job_counts, target_job_counts)
+	quotas_updated.emit()
 
 func unregister_ant(job: Enums.JobType) -> void:
 	current_job_counts[job] = maxi(0, current_job_counts.get(job, 0) - 1)
 	job_assignments_changed.emit(current_job_counts, target_job_counts)
+	quotas_updated.emit()

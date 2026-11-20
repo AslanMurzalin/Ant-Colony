@@ -8,15 +8,22 @@ signal world_initialized()
 @onready var camera: CameraController = $Camera2D
 @onready var queen: QueenController = $Queen
 @onready var ants_container: Node2D = $Ants
+@onready var grid_cursor: GridCursor = $GridCursor
+@onready var build_menu: BuildMenuController = $UILayer/BuildMenuController
 
 var ant_scene: PackedScene = preload("res://scenes/entities/ant.tscn")
 
 func _ready() -> void:
+	if build_menu != null and grid_cursor != null:
+		build_menu.tool_selected.connect(func(tool_id: int) -> void:
+			grid_cursor.select_tool(tool_id)
+		)
 	initialize_world()
 
 func initialize_world() -> void:
 	if camera != null:
 		camera.center_on_position(Vector2(960.0, 540.0))
+	GameManager.start_new_run()
 	spawn_starter_ants(5)
 	world_initialized.emit()
 

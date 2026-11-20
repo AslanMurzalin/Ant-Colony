@@ -8,6 +8,8 @@ signal threat_spawned(threat_node: Node2D)
 signal threat_defeated(threat_node: Node2D)
 signal rain_storm_started(duration: float)
 signal rain_storm_ended()
+signal rain_started(duration: float)
+signal rain_stopped()
 
 var daily_threat_schedule: Dictionary = {} # int -> Array[Dictionary]
 var active_threats: Array[Node2D] = []
@@ -73,6 +75,7 @@ func _process_rain_flooding(delta: float) -> void:
 			if GridManager != null:
 				GridManager.drain_cells()
 			rain_storm_ended.emit()
+			rain_stopped.emit()
 
 func schedule_threats_for_day(day: int, seed_value: int) -> void:
 	daily_threat_schedule[day] = []
@@ -216,6 +219,7 @@ func trigger_rain_event(duration: float) -> void:
 	rain_active = true
 	rain_timer = duration
 	rain_storm_started.emit(duration)
+	rain_started.emit(duration)
 	
 	if GridManager != null:
 		# Floods bottom-most 3 rows

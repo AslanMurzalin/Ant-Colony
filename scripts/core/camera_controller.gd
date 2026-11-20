@@ -22,6 +22,7 @@ var drag_start_mouse_pos: Vector2 = Vector2.ZERO
 var drag_start_camera_pos: Vector2 = Vector2.ZERO
 
 func _ready() -> void:
+	add_to_group("camera")
 	set_bounds(limit_left_val, limit_top_val, limit_right_val, limit_bottom_val)
 
 func _process(delta: float) -> void:

@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=15 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/day_summary_controller.tscn" id="11_summary"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="12_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/audio_controller.tscn" id="13_audio"]
+[ext_resource type="PackedScene" path="res://scenes/ui/build_menu_controller.tscn" id="14_build"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -64,6 +65,8 @@ layer = 10
 [node name="DaySummaryController" parent="UILayer" instance=ExtResource("11_summary")]
 
 [node name="PauseMenu" parent="UILayer" instance=ExtResource("12_pause")]
+
+[node name="BuildMenuController" parent="UILayer" instance=ExtResource("14_build")]
 
 [node name="ThreatAlertUI" type="CanvasLayer" parent="."]
 layer = 11
