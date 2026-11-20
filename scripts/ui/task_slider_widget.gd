@@ -116,7 +116,10 @@ func _on_slider_changed(job: Enums.JobType, value: float) -> void:
 
 func _on_lock_toggled(job: Enums.JobType, pressed: bool) -> void:
 	_locked[job] = pressed
+	TaskAllocationManager.lock_slider(job, pressed)
 	_lock_btns[job].text = "🔒" if pressed else "🔓"
+	if _sliders.has(job):
+		_sliders[job].editable = not pressed
 
 
 func _on_quotas_updated() -> void:

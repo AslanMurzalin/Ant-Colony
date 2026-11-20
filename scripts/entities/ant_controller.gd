@@ -87,18 +87,19 @@ func navigate_to(target_world_pos: Vector2) -> void:
 	
 	path_waypoints = waypoints
 	current_path_index = 0
-	if path_waypoints.size() > 0:
-		current_target_pos = path_waypoints[0]
+	current_target_pos = target_world_pos
+	if path_waypoints.size() > 0 and path_waypoints[0].distance_to(global_position) < 8.0:
+		current_path_index = 1
 
 func move_along_path(delta: float) -> bool:
-	if current_path_index >= path_waypoints.size():
+	if path_waypoints.is_empty() or current_path_index >= path_waypoints.size():
 		velocity = Vector2.ZERO
 		return true
 
 	var target_wp: Vector2 = path_waypoints[current_path_index]
 	var dist: float = global_position.distance_to(target_wp)
 	
-	if dist <= 4.0:
+	if dist <= 8.0:
 		current_path_index += 1
 		if current_path_index >= path_waypoints.size():
 			velocity = Vector2.ZERO
@@ -143,10 +144,21 @@ func _tick_dig() -> void:
 					if path_waypoints.size() > 0:
 						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
 					else:
-						# If no path, stay idle
-						pass
+						target_cell = Vector2i(-1, -1)
+			else:
+				var home_pos: Vector2 = Vector2(976.0, 528.0)
+				if global_position.distance_to(home_pos) > 96.0:
+					navigate_to(home_pos)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
 
 		Enums.AntState.TRAVELING_TO_TARGET:
+			if target_cell == Vector2i(-1, -1):
+				var reached_home: bool = move_along_path(get_physics_process_delta_time())
+				if reached_home:
+					set_ant_state(Enums.AntState.IDLE)
+				return
+				
 			if not GridManager.is_cell_marked_for_dig(target_cell):
 				path_waypoints.clear()
 				target_cell = Vector2i(-1, -1)
@@ -162,7 +174,13 @@ func _tick_dig() -> void:
 			else:
 				var reached: bool = move_along_path(get_physics_process_delta_time())
 				if reached:
-					set_ant_state(Enums.AntState.WORKING)
+					cur_cell = GridManager.world_to_grid(global_position)
+					is_adjacent = (abs(cur_cell.x - target_cell.x) + abs(cur_cell.y - target_cell.y)) <= 1
+					if is_adjacent:
+						set_ant_state(Enums.AntState.WORKING)
+					else:
+						target_cell = Vector2i(-1, -1)
+						set_ant_state(Enums.AntState.IDLE)
 
 		Enums.AntState.WORKING:
 			if not GridManager.is_cell_marked_for_dig(target_cell) or GridManager.get_cell_type(target_cell) != Enums.CellType.SOIL:
@@ -203,9 +221,21 @@ func _tick_forage() -> void:
 					navigate_to(food.global_position)
 					if path_waypoints.size() > 0:
 						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+				else:
+					var home_pos: Vector2 = Vector2(976.0, 528.0)
+					if global_position.distance_to(home_pos) > 96.0:
+						navigate_to(home_pos)
+						if path_waypoints.size() > 0:
+							set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
 
 		Enums.AntState.TRAVELING_TO_TARGET:
-			if target_food_source == null or not is_instance_valid(target_food_source) or target_food_source.is_depleted:
+			if target_food_source == null:
+				var reached_home: bool = move_along_path(get_physics_process_delta_time())
+				if reached_home:
+					set_ant_state(Enums.AntState.IDLE)
+				return
+
+			if not is_instance_valid(target_food_source) or target_food_source.is_depleted:
 				target_food_source = null
 				path_waypoints.clear()
 				set_ant_state(Enums.AntState.IDLE)
@@ -213,7 +243,7 @@ func _tick_forage() -> void:
 			
 			var reached: bool = move_along_path(get_physics_process_delta_time())
 			var dist: float = global_position.distance_to(target_food_source.global_position)
-			if reached or dist <= 20.0:
+			if reached or dist <= 24.0:
 				path_waypoints.clear()
 				velocity = Vector2.ZERO
 				var harvested: int = target_food_source.harvest_unit()
@@ -231,7 +261,7 @@ func _tick_forage() -> void:
 		Enums.AntState.CARRYING_PAYLOAD:
 			var reached_deposit: bool = move_along_path(get_physics_process_delta_time())
 			var dist: float = global_position.distance_to(current_target_pos)
-			if reached_deposit or dist <= 24.0:
+			if reached_deposit or dist <= 28.0:
 				path_waypoints.clear()
 				velocity = Vector2.ZERO
 				ResourceManager.add_food(1)
@@ -248,6 +278,11 @@ func _tick_nurse() -> void:
 				return
 			
 			if not ResourceManager.has_food(1):
+				var home_pos: Vector2 = Vector2(976.0, 528.0)
+				if global_position.distance_to(home_pos) > 96.0:
+					navigate_to(home_pos)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
 				return
 			
 			target_feed_entity = null
@@ -264,11 +299,30 @@ func _tick_nurse() -> void:
 			
 			if target_feed_entity != null:
 				var fetch_pos: Vector2 = _find_nearest_food_storage()
-				navigate_to(fetch_pos)
-				if path_waypoints.size() > 0:
-					set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+				if global_position.distance_to(fetch_pos) <= 24.0:
+					if ResourceManager.consume_food(1):
+						carried_cargo = "food"
+						update_cargo_visuals()
+						navigate_to(target_feed_entity.global_position)
+						set_ant_state(Enums.AntState.CARRYING_PAYLOAD)
+				else:
+					navigate_to(fetch_pos)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+			else:
+				var home_pos: Vector2 = Vector2(976.0, 528.0)
+				if global_position.distance_to(home_pos) > 96.0:
+					navigate_to(home_pos)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
 
 		Enums.AntState.TRAVELING_TO_TARGET:
+			if target_feed_entity == null:
+				var reached_home: bool = move_along_path(get_physics_process_delta_time())
+				if reached_home:
+					set_ant_state(Enums.AntState.IDLE)
+				return
+
 			var reached: bool = move_along_path(get_physics_process_delta_time())
 			var dist: float = global_position.distance_to(current_target_pos)
 			if reached or dist <= 24.0:

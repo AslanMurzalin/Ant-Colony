@@ -57,6 +57,8 @@ func get_job_current_count(job: Enums.JobType) -> int:
 	return current_job_counts.get(job, 0)
 
 func set_task_percentage(job: Enums.JobType, new_value: float) -> void:
+	if locked_sliders.get(job, false):
+		return
 	new_value = clampf(new_value, 0.0, 1.0)
 	
 	var all_jobs: Array[Enums.JobType] = [
@@ -77,6 +79,9 @@ func set_task_percentage(job: Enums.JobType, new_value: float) -> void:
 			locked_sum += target_percentages[j]
 		else:
 			unlocked_other_jobs.append(j)
+
+	if unlocked_other_jobs.size() == 0:
+		return
 
 	# Cap new_value so locked sliders aren't violated
 	var max_allowed_for_job: float = 1.0 - locked_sum
@@ -108,7 +113,10 @@ func set_task_percentage(job: Enums.JobType, new_value: float) -> void:
 			target_percentages[j] = target_percentages[j] / final_sum
 
 	task_percentages_updated.emit(target_percentages)
-	quotas_updated.emit()
+	if GameManager != null and GameManager.total_workers_alive > 0:
+		recalculate_job_targets(GameManager.total_workers_alive)
+	else:
+		quotas_updated.emit()
 
 func recalculate_job_targets(total_ants: int) -> void:
 	if total_ants <= 0:

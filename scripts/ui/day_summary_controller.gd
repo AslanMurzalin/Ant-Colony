@@ -71,8 +71,10 @@ func show_victory(rating: String, final_stats: Dictionary) -> void:
 	_food_label.text    = ""
 	_rating_label.text  = "Final Rating:  " + rating
 	_continue_btn.text  = "Play Again"
-	_continue_btn.disconnect("pressed", _on_continue_pressed)
-	_continue_btn.connect("pressed", _on_restart_pressed)
+	if _continue_btn.is_connected("pressed", _on_continue_pressed):
+		_continue_btn.disconnect("pressed", _on_continue_pressed)
+	if not _continue_btn.is_connected("pressed", _on_restart_pressed):
+		_continue_btn.connect("pressed", _on_restart_pressed)
 	show()
 
 
@@ -84,11 +86,14 @@ func show_defeat(reason: String) -> void:
 	_food_label.text    = ""
 	_rating_label.text  = ""
 	_continue_btn.text  = "Try Again"
-	_continue_btn.disconnect("pressed", _on_continue_pressed)
-	_continue_btn.connect("pressed", _on_restart_pressed)
+	if _continue_btn.is_connected("pressed", _on_continue_pressed):
+		_continue_btn.disconnect("pressed", _on_continue_pressed)
+	if not _continue_btn.is_connected("pressed", _on_restart_pressed):
+		_continue_btn.connect("pressed", _on_restart_pressed)
 	show()
 
 
 func _on_restart_pressed() -> void:
 	hide()
-	GameManager.start_new_run()
+	Engine.time_scale = 1.0
+	get_tree().reload_current_scene()
