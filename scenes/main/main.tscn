@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=20 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -17,6 +17,8 @@
 [ext_resource type="Texture2D" path="res://assets/sprites_topdown/anthill_entrance.png" id="15_entrance"]
 [ext_resource type="Texture2D" path="res://assets/sprites_topdown/tree_stump.png" id="16_stump"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ant_roster_controller.tscn" id="17_roster"]
+[ext_resource type="Script" path="res://scripts/grid/selection_controller.gd" id="18_selection"]
+[ext_resource type="PackedScene" path="res://scenes/ui/selection_popup.tscn" id="19_popup"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -53,6 +55,10 @@ script = ExtResource("3_gridview")
 [node name="GridCursor" type="Node2D" parent="."]
 script = ExtResource("4_cursor")
 
+[node name="SelectionController" type="Node2D" parent="." node_paths=PackedStringArray("selection_popup")]
+script = ExtResource("18_selection")
+selection_popup = NodePath("UILayer/SelectionPopup")
+
 [node name="WeatherController" type="Node2D" parent="."]
 script = ExtResource("7_weather")
 
@@ -82,6 +88,8 @@ layer = 10
 [node name="BuildMenuController" parent="UILayer" instance=ExtResource("14_build")]
 
 [node name="AntRosterController" parent="UILayer" instance=ExtResource("17_roster")]
+
+[node name="SelectionPopup" parent="UILayer" instance=ExtResource("19_popup")]
 
 [node name="ThreatAlertUI" type="CanvasLayer" parent="."]
 layer = 11

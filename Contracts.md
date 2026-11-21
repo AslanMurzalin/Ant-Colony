@@ -142,6 +142,10 @@ Controls the indirect slider-based task distribution. Enforces that percentages 
   - *Description:* Increments `current_job_counts[job]` when an ant is spawned or assumes a job.
 - `unregister_ant(job: Enums.JobType) -> void`
   - *Description:* Decrements `current_job_counts[job]` when an ant dies or vacates its assignment.
+- `get_pinned_ant_count() -> int`
+  - *Description:* Returns the total number of worker ants currently manually pinned to their jobs.
+- `unpin_all_ants() -> void`
+  - *Description:* Clears manual pinning for all active workers and recalculates quotas for the colony.
 
 ---
 
@@ -398,6 +402,14 @@ Base controller for worker ants. Manages locomotion, pathfinding, visual role ba
   - *Description:* Gently nudges nearby ants away from each other when within close proximity to prevent sprite stacking.
 - `get_action_description() -> String`
   - *Description:* Returns human-readable status description of the ant's current activity for the colony roster UI.
+- `set_manually_pinned(pinned: bool) -> void`
+  - *Description:* Sets or unsets manual pinning flag and queues visual redraw for pin diamond marker.
+- `assign_job_manually(new_job: Enums.JobType) -> void`
+  - *Description:* Directly assigns a specific role to the worker and marks it as manually pinned.
+- `unpin_job() -> void`
+  - *Description:* Removes manual pinning so the worker returns to slider auto-allocation.
+- `set_selected(selected: bool) -> void`
+  - *Description:* Sets selection highlight state and queues visual redraw for the selection ring.
 
 ---
 
@@ -717,6 +729,8 @@ Top HUD strip — Day, day progress bar, Food, Ants alive, Queen HP, speed butto
   - *Description:* Updates food label to `"Food: X / Y"`.
 - `_on_ant_count_changed(alive: int, _max: int) -> void`
   - *Description:* Updates ants label to `"Ants: X / 50"`.
+- `_update_ants_label(alive: int = -1) -> void`
+  - *Description:* Updates the ants count label and displays the count of manually pinned workers if greater than zero.
 - `_refresh_all() -> void`
   - *Description:* Full refresh of all HUD elements; called in `_ready()`.
 - `_refresh_queen_hp() -> void`
@@ -848,6 +862,53 @@ Side drawer menu displaying live activity, role, health, and status for every an
   - *Description:* Instantiates a formatted card containing role badge, health, current action text, and camera focus button.
 - `_focus_on_ant(ant: AntController) -> void`
   - *Description:* Centers the active cross-section camera on the specified ant's world position.
+- `_assign_role_to_ant(ant: AntController, role: Enums.JobType) -> void`
+  - *Description:* Directly assigns a job to an individual worker ant, flags it as manually pinned, and recalculates quotas.
+- `_unpin_ant(ant: AntController) -> void`
+  - *Description:* Unpins a worker ant so it returns to automatic quota allocation.
+
+---
+
+### 6.8 `SelectionController` (`res://scripts/grid/selection_controller.gd`)
+Controls Shift+RMB box selection of worker ants in the world, renders selection rectangle overlay, and manages the role assignment popup.
+
+#### Signals
+- `ants_selected(selected: Array[AntController])`
+- `selection_cleared()`
+
+#### Methods
+- `_finish_selection() -> void`
+  - *Description:* Evaluates the world-space selection rectangle or click point, populates selected workers, highlights them, and displays `SelectionPopup`.
+- `_on_role_chosen(job: Enums.JobType) -> void`
+  - *Description:* Receives role selection from popup, assigns role and manual pin to all selected ants, and clears selection.
+- `_on_unpin_chosen() -> void`
+  - *Description:* Unpins all selected ants, returns them to automatic quota allocation, and clears selection.
+- `clear_selection() -> void`
+  - *Description:* Unselects all currently highlighted ants, hides the popup, and emits `selection_cleared()`.
+- `get_selected_ants() -> Array[AntController]`
+  - *Description:* Returns the current list of selected worker ants.
+
+---
+
+### 6.9 `SelectionPopup` (`res://scripts/ui/selection_popup.gd`)
+Floating context menu that appears after selecting ants with Shift+RMB, allowing rapid direct role assignment or unpinning.
+
+#### Signals
+- `role_chosen(job: Enums.JobType)`
+- `unpin_chosen()`
+- `popup_closed()`
+
+#### Methods
+- `open_at(screen_pos: Vector2, ant_count: int) -> void`
+  - *Description:* Positions and displays the popup at the clamped screen coordinate showing the count of selected ants.
+- `close_popup() -> void`
+  - *Description:* Hides the popup and emits `popup_closed()`.
+- `_on_role_pressed(job: Enums.JobType) -> void`
+  - *Description:* Emits `role_chosen` with the selected `Enums.JobType` and hides the popup.
+- `_on_unpin_pressed() -> void`
+  - *Description:* Emits `unpin_chosen` and hides the popup.
+- `_on_close_pressed() -> void`
+  - *Description:* Closes the popup without making changes.
 
 ---
 

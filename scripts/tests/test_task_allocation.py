@@ -124,5 +124,18 @@ class TestTaskAllocationMath(unittest.TestCase):
         self.assertAlmostEqual(self.percentages["FORAGE"], 0.5, places=4)
         self.assertAlmostEqual(sum(self.percentages.values()), 1.0, places=5)
 
+    def test_pinned_ant_apportionment(self):
+        # When 2 ants are manually pinned to DIG out of 10 ants total:
+        total_ants = 10
+        pinned = {"FORAGE": 0, "DIG": 2, "NURSE": 0, "DEFEND": 0}
+        total_pinned = sum(pinned.values())
+        unpinned = max(0, total_ants - total_pinned)
+
+        unpinned_targets = self.recalculate_job_targets(unpinned)
+        final_targets = {j: unpinned_targets[j] + pinned[j] for j in self.jobs}
+
+        self.assertEqual(sum(final_targets.values()), total_ants)
+        self.assertGreaterEqual(final_targets["DIG"], 2)
+
 if __name__ == "__main__":
     unittest.main()

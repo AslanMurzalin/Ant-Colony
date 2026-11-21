@@ -11,6 +11,8 @@ signal job_switched(old_job: Enums.JobType, new_job: Enums.JobType)
 @export var state: Enums.AntState = Enums.AntState.IDLE
 @export var health: float = 20.0
 @export var move_speed: float = 45.0
+var is_manually_pinned: bool = false
+var is_selected: bool = false
 var carried_cargo: Variant = null
 var current_target_pos: Vector2 = Vector2.ZERO
 var target_cell: Vector2i = Vector2i(-1, -1)
@@ -34,6 +36,17 @@ func _ready() -> void:
 	add_to_group("workers")
 	update_job_visuals()
 	update_cargo_visuals()
+
+func _draw() -> void:
+	if is_selected:
+		draw_arc(Vector2.ZERO, 10.0, 0.0, TAU, 16, Color(1.0, 0.9, 0.2, 0.9), 1.5)
+	if is_manually_pinned:
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(0, -18),
+			Vector2(2.5, -15.5),
+			Vector2(0, -13),
+			Vector2(-2.5, -15.5)
+		]), Color(1.0, 0.85, 0.1, 1.0))
 
 func _physics_process(delta: float) -> void:
 	if GameManager.game_state == Enums.GameState.RUNNING:
@@ -66,10 +79,36 @@ func assign_job(new_job: Enums.JobType) -> void:
 	if current_job != Enums.JobType.IDLE:
 		TaskAllocationManager.register_ant(current_job)
 	
+	target_cell = Vector2i(-1, -1)
+	target_food_source = null
+	target_feed_entity = null
+	combat_target = null
+	path_waypoints.clear()
+	set_ant_state(Enums.AntState.IDLE)
+
 	update_job_visuals()
+	queue_redraw()
 	job_switched.emit(old_job, new_job)
 
+func set_manually_pinned(pinned: bool) -> void:
+	is_manually_pinned = pinned
+	queue_redraw()
+
+func assign_job_manually(new_job: Enums.JobType) -> void:
+	set_manually_pinned(true)
+	assign_job(new_job)
+
+func unpin_job() -> void:
+	set_manually_pinned(false)
+
+func set_selected(selected: bool) -> void:
+	if is_selected != selected:
+		is_selected = selected
+		queue_redraw()
+
 func request_job_transition() -> void:
+	if is_manually_pinned:
+		return
 	if state != Enums.AntState.IDLE:
 		return
 	var desired_job: Enums.JobType = TaskAllocationManager.request_job_for_ant(self)

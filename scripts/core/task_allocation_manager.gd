@@ -133,13 +133,33 @@ func recalculate_job_targets(total_ants: int) -> void:
 		Enums.JobType.DEFEND
 	]
 
-	# Largest Remainder Method (Hamilton method)
+	# Count manually pinned ants per job so unpinned ants fill remaining quotas
+	var pinned_counts: Dictionary = {
+		Enums.JobType.FORAGE: 0,
+		Enums.JobType.DIG: 0,
+		Enums.JobType.NURSE: 0,
+		Enums.JobType.DEFEND: 0
+	}
+	var total_pinned: int = 0
+	if get_tree() != null:
+		var workers: Array = get_tree().get_nodes_in_group("workers")
+		for w in workers:
+			if is_instance_valid(w) and w is AntController:
+				var ant: AntController = w as AntController
+				if ant.is_manually_pinned:
+					var pj: Enums.JobType = ant.current_job
+					pinned_counts[pj] = pinned_counts.get(pj, 0) + 1
+					total_pinned += 1
+
+	var unpinned_ants: int = maxi(0, total_ants - total_pinned)
+
+	# Largest Remainder Method (Hamilton method) on unpinned ants
 	var int_parts: Dictionary = {}
 	var remainders: Array[Dictionary] = []
 	var allocated: int = 0
 
 	for j in jobs:
-		var exact: float = float(total_ants) * target_percentages.get(j, 0.25)
+		var exact: float = float(unpinned_ants) * target_percentages.get(j, 0.25)
 		var int_val: int = int(floor(exact))
 		int_parts[j] = int_val
 		allocated += int_val
@@ -153,18 +173,21 @@ func recalculate_job_targets(total_ants: int) -> void:
 		return a["rem"] > b["rem"]
 	)
 
-	var seats_left: int = total_ants - allocated
+	var seats_left: int = unpinned_ants - allocated
 	for i in range(seats_left):
 		var target_j: Enums.JobType = remainders[i % remainders.size()]["job"]
 		int_parts[target_j] += 1
 
 	for j in jobs:
-		target_job_counts[j] = int_parts[j]
+		target_job_counts[j] = int_parts[j] + pinned_counts.get(j, 0)
 
 	job_assignments_changed.emit(current_job_counts, target_job_counts)
 	quotas_updated.emit()
 
 func request_job_for_ant(ant: AntController) -> Enums.JobType:
+	if ant != null and ant.is_manually_pinned:
+		return ant.current_job
+
 	var highest_deficit: int = -9999
 	var selected_job: Enums.JobType = Enums.JobType.FORAGE
 
@@ -182,6 +205,27 @@ func request_job_for_ant(ant: AntController) -> Enums.JobType:
 			selected_job = j
 
 	return selected_job
+
+func get_pinned_ant_count() -> int:
+	var count: int = 0
+	if get_tree() != null:
+		var workers: Array = get_tree().get_nodes_in_group("workers")
+		for w in workers:
+			if is_instance_valid(w) and w is AntController:
+				if (w as AntController).is_manually_pinned:
+					count += 1
+	return count
+
+func unpin_all_ants() -> void:
+	if get_tree() != null:
+		var workers: Array = get_tree().get_nodes_in_group("workers")
+		for w in workers:
+			if is_instance_valid(w) and w is AntController:
+				(w as AntController).set_manually_pinned(false)
+		if GameManager != null and GameManager.total_workers_alive > 0:
+			recalculate_job_targets(GameManager.total_workers_alive)
+		else:
+			recalculate_job_targets(workers.size())
 
 func register_ant(job: Enums.JobType) -> void:
 	current_job_counts[job] = current_job_counts.get(job, 0) + 1

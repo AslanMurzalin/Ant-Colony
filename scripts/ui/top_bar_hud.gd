@@ -26,6 +26,9 @@ func _ready() -> void:
 	GameManager.connect("day_progress_ticked", _on_day_progress)
 	ResourceManager.connect("food_changed",   _on_food_changed)
 	GameManager.connect("ant_count_changed",  _on_ant_count_changed)
+	TaskAllocationManager.connect("quotas_updated", func() -> void:
+		_update_ants_label()
+	)
 
 	_btn_pause.connect("pressed", func() -> void: _set_speed(SPEED_PAUSE))
 	_btn_1x.connect("pressed",   func() -> void: _set_speed(SPEED_1X))
@@ -83,8 +86,16 @@ func _on_food_changed(current: int, capacity: int) -> void:
 
 
 func _on_ant_count_changed(alive: int, _max: int) -> void:
-	_ants_label.text = "Ants: %d / 50" % alive
+	_update_ants_label(alive)
 
+func _update_ants_label(alive: int = -1) -> void:
+	if alive < 0:
+		alive = GameManager.total_workers_alive
+	var pinned: int = TaskAllocationManager.get_pinned_ant_count()
+	if pinned > 0:
+		_ants_label.text = "Ants: %d / 50 (📌%d)" % [alive, pinned]
+	else:
+		_ants_label.text = "Ants: %d / 50" % alive
 
 # ── Refresh helpers ──────────────────────────────────────────────────────────
 
@@ -92,7 +103,7 @@ func _refresh_all() -> void:
 	_day_label.text   = "Day %d / 10" % GameManager.current_day
 	_day_bar.value    = 0.0
 	_food_label.text  = "Food: %d / %d" % [ResourceManager.stored_food, ResourceManager.food_capacity]
-	_ants_label.text  = "Ants: %d / 50" % GameManager.total_workers_alive
+	_update_ants_label(GameManager.total_workers_alive)
 	_refresh_queen_hp()
 	_update_speed_buttons(Engine.time_scale)
 

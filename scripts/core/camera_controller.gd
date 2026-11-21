@@ -42,7 +42,8 @@ func _process(delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
-		if mouse_event.button_index == MOUSE_BUTTON_MIDDLE or mouse_event.button_index == MOUSE_BUTTON_RIGHT:
+		var is_rmb: bool = mouse_event.button_index == MOUSE_BUTTON_RIGHT and not mouse_event.shift_pressed and not Input.is_key_pressed(KEY_SHIFT)
+		if mouse_event.button_index == MOUSE_BUTTON_MIDDLE or is_rmb:
 			if mouse_event.pressed:
 				is_dragging = true
 				drag_start_mouse_pos = mouse_event.position

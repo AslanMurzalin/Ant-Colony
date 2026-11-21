@@ -44,7 +44,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			if mouse_event.button_index == MOUSE_BUTTON_LEFT:
 				handle_click(current_hover_cell, false)
 			elif mouse_event.button_index == MOUSE_BUTTON_RIGHT:
-				handle_click(current_hover_cell, true)
+				if not mouse_event.shift_pressed and not Input.is_key_pressed(KEY_SHIFT):
+					handle_click(current_hover_cell, true)
 
 func select_tool(tool_id: int) -> void:
 	current_tool = tool_id

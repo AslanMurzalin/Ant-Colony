@@ -43,6 +43,11 @@ size_flags_horizontal = 3
 text = "🐜 Colony Roster (0 / 50)"
 theme_override_font_sizes/font_size = 18
 
+[node name="UnpinAllBtn" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HeaderHBox"]
+layout_mode = 2
+text = "🔓 Unpin All"
+tooltip_text = "Return all pinned ants to auto-allocation"
+
 [node name="CloseBtn" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HeaderHBox"]
 layout_mode = 2
 custom_minimum_size = Vector2(30, 26)

@@ -21,7 +21,10 @@ func _ready() -> void:
 			grid_cursor.select_tool(tool_id)
 		)
 	if top_bar != null and ant_roster != null:
-		top_bar.roster_toggled.connect(ant_roster.toggle_roster)
+		top_bar.roster_toggled.connect(func() -> void:
+			if ant_roster.has_method("toggle_roster"):
+				ant_roster.toggle_roster()
+		)
 	initialize_world()
 
 func initialize_world() -> void:

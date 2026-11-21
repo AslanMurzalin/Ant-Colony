@@ -1,0 +1,72 @@
+[gd_scene load_steps=2 format=3 uid="uid://selection_popup"]
+
+[ext_resource type="Script" path="res://scripts/ui/selection_popup.gd" id="1_popup"]
+
+[node name="SelectionPopup" type="PanelContainer"]
+custom_minimum_size = Vector2(180, 150)
+offset_right = 180.0
+offset_bottom = 150.0
+script = ExtResource("1_popup")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HeaderHBox" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer/HeaderHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🎯 Selected: 0"
+theme_override_font_sizes/font_size = 13
+
+[node name="CloseBtn" type="Button" parent="MarginContainer/VBoxContainer/HeaderHBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(22, 22)
+text = "✕"
+
+[node name="HSeparator" type="HSeparator" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+
+[node name="RolesGrid" type="GridContainer" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+columns = 2
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="BtnForage" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🌾 Forage"
+theme_override_font_sizes/font_size = 11
+
+[node name="BtnDig" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⛏ Dig"
+theme_override_font_sizes/font_size = 11
+
+[node name="BtnNurse" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "🍼 Nurse"
+theme_override_font_sizes/font_size = 11
+
+[node name="BtnDefend" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⚔ Defend"
+theme_override_font_sizes/font_size = 11
+
+[node name="BtnUnpin" type="Button" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "🔓 Unpin (Auto)"
+theme_override_font_sizes/font_size = 11
