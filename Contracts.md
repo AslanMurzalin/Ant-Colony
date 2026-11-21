@@ -104,6 +104,8 @@ Oversees the run lifecycle, day-night progression, game speed, win/lose evaluati
   - *Description:* Transitions `game_state` to `VICTORY`, calculates colony score rating (Fledgling, Healthy, Thriving), and emits `game_won`.
 - `calculate_end_rating() -> String`
   - *Description:* Evaluates surviving ants, stored food, and Queen health to return `"Fledgling"`, `"Healthy"`, or `"Thriving"`.
+- `get_next_ant_id() -> int`
+  - *Description:* Generates and returns a unique, strictly incrementing integer ID for identifying individual worker ants.
 
 ---
 

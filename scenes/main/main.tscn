@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=19 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -9,7 +9,6 @@
 [ext_resource type="Script" path="res://scripts/weather/weather_controller.gd" id="7_weather"]
 [ext_resource type="Script" path="res://scripts/ui/threat_alert_controller.gd" id="8_alert"]
 [ext_resource type="PackedScene" path="res://scenes/ui/top_bar_hud.tscn" id="9_topbar"]
-[ext_resource type="PackedScene" path="res://scenes/ui/task_slider_widget.tscn" id="10_sliders"]
 [ext_resource type="PackedScene" path="res://scenes/ui/day_summary_controller.tscn" id="11_summary"]
 [ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="12_pause"]
 [ext_resource type="PackedScene" path="res://scenes/ui/audio_controller.tscn" id="13_audio"]
@@ -30,6 +29,7 @@ offset_left = -400.0
 offset_top = -400.0
 offset_right = 2400.0
 offset_bottom = 200.0
+mouse_filter = 2
 color = Color(0.749, 0.89, 0.949, 1)
 
 [node name="Grass" type="ColorRect" parent="Background"]
@@ -37,6 +37,7 @@ offset_left = -400.0
 offset_top = 200.0
 offset_right = 2400.0
 offset_bottom = 256.0
+mouse_filter = 2
 color = Color(0.678, 0.69, 0.27, 1)
 
 [node name="TreeStump" type="Sprite2D" parent="Background"]
@@ -78,8 +79,6 @@ script = ExtResource("2_camera")
 layer = 10
 
 [node name="TopBarHUD" parent="UILayer" instance=ExtResource("9_topbar")]
-
-[node name="TaskSliderWidget" parent="UILayer" instance=ExtResource("10_sliders")]
 
 [node name="DaySummaryController" parent="UILayer" instance=ExtResource("11_summary")]
 

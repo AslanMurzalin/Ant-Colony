@@ -119,18 +119,16 @@ func refresh_roster() -> void:
 		_ant_list_container.add_child(empty_lbl)
 		return
 
-	# Sort workers by job priority
+	# Sort workers stably by persistent ant_id
 	workers.sort_custom(func(a: AntController, b: AntController) -> bool:
-		return a.current_job < b.current_job
+		return a.ant_id < b.ant_id
 	)
 
-	var index: int = 1
 	for ant in workers:
-		var card: PanelContainer = _create_ant_card(ant, index)
+		var card: PanelContainer = _create_ant_card(ant)
 		_ant_list_container.add_child(card)
-		index += 1
 
-func _create_ant_card(ant: AntController, ant_index: int) -> PanelContainer:
+func _create_ant_card(ant: AntController) -> PanelContainer:
 	var card: PanelContainer = PanelContainer.new()
 	card.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
@@ -162,7 +160,7 @@ func _create_ant_card(ant: AntController, ant_index: int) -> PanelContainer:
 	vbox.add_child(top_line)
 
 	var name_lbl: Label = Label.new()
-	name_lbl.text = "Ant #%d" % ant_index
+	name_lbl.text = "Ant #%d" % (ant.ant_id if ant.ant_id > 0 else 1)
 	name_lbl.add_theme_font_size_override("font_size", 14)
 	top_line.add_child(name_lbl)
 

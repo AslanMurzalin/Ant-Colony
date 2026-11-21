@@ -21,7 +21,7 @@ func _ready() -> void:
 		selection_popup.unpin_chosen.connect(_on_unpin_chosen)
 		selection_popup.popup_closed.connect(clear_selection)
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if event is InputEventMouseButton:
 		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
 		var is_shift: bool = mouse_event.shift_pressed or Input.is_key_pressed(KEY_SHIFT)
@@ -32,12 +32,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				selection_start_world = get_global_mouse_position()
 				selection_curr_world = selection_start_world
 				queue_redraw()
+				get_viewport().set_input_as_handled()
 			else:
 				if is_box_selecting:
 					is_box_selecting = false
 					selection_curr_world = get_global_mouse_position()
 					queue_redraw()
 					_finish_selection()
+					get_viewport().set_input_as_handled()
 
 		elif mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
 			# If user clicks LMB somewhere while popup is open, close popup if not clicking inside it
@@ -93,7 +95,7 @@ func _finish_selection() -> void:
 			var ant: AntController = node as AntController
 			# If dragged box is small (< 8px), do point/radius check near click
 			if size.x < 8.0 and size.y < 8.0:
-				if ant.global_position.distance_to(selection_curr_world) <= 16.0:
+				if ant.global_position.distance_to(selection_curr_world) <= 24.0:
 					selected_ants.append(ant)
 			else:
 				if select_rect.has_point(ant.global_position):

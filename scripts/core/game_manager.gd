@@ -22,9 +22,15 @@ var total_workers_alive: int = 0
 var ants_born_today: int = 0
 var ants_lost_today: int = 0
 var food_gathered_today: int = 0
+var next_ant_id: int = 1
 
 func _ready() -> void:
 	pass
+
+func get_next_ant_id() -> int:
+	var assigned_id: int = next_ant_id
+	next_ant_id += 1
+	return assigned_id
 
 func _process(delta: float) -> void:
 	if game_state == Enums.GameState.RUNNING:
@@ -46,6 +52,7 @@ func start_new_run(optional_seed: int = -1) -> void:
 	current_day = 1
 	day_timer = 0.0
 	total_workers_alive = 0
+	next_ant_id = 1
 	ants_born_today = 0
 	ants_lost_today = 0
 	food_gathered_today = 0

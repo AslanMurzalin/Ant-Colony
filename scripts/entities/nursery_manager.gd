@@ -103,6 +103,7 @@ func mature_larva(larva_id: int) -> void:
 		return
 	
 	var ant: AntController = ant_scene.instantiate() as AntController
+	ant.ant_id = GameManager.get_next_ant_id()
 	ant.position = spawn_pos
 	
 	var main_node: Node = get_tree().current_scene

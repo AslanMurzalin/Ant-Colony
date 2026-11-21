@@ -11,6 +11,7 @@ signal job_switched(old_job: Enums.JobType, new_job: Enums.JobType)
 @export var state: Enums.AntState = Enums.AntState.IDLE
 @export var health: float = 20.0
 @export var move_speed: float = 45.0
+var ant_id: int = 0
 var is_manually_pinned: bool = false
 var is_selected: bool = false
 var carried_cargo: Variant = null

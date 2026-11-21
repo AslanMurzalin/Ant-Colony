@@ -14,6 +14,11 @@ var flash_timer: float = 0.0
 var path_waypoints: Array[Vector2] = []
 var current_path_index: int = 0
 var current_target: Node2D = null
+var repath_timer: float = 0.0
+
+const ENTRANCE_X: float = 976.0
+const SURFACE_Y: float = 228.0
+const UNDERGROUND_Y: float = 256.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 
@@ -35,12 +40,36 @@ func _process_beetle_behavior(delta: float) -> void:
 	if attack_timer > 0.0:
 		attack_timer -= delta
 
-	# Check or re-evaluate target
-	if current_target == null or not is_instance_valid(current_target):
-		current_target = find_highest_priority_target()
-		if current_target != null:
-			_navigate_to_target(current_target.global_position)
+	# 1. Surface stage: walk along surface grass toward anthill entrance
+	if global_position.y < UNDERGROUND_Y - 4.0:
+		global_position.y = SURFACE_Y
+		var x_dist: float = ENTRANCE_X - global_position.x
+		if absf(x_dist) > 8.0:
+			var dir_x: float = signf(x_dist)
+			velocity = Vector2(dir_x * move_speed, 0.0)
+			move_and_slide()
+			if sprite != null and absf(dir_x) > 0.1:
+				sprite.flip_h = (dir_x < 0.0)
 
+			# Check for surface ants to attack
+			var target_ant: Node2D = find_highest_priority_target()
+			if target_ant != null and global_position.distance_to(target_ant.global_position) <= 24.0:
+				if attack_timer <= 0.0:
+					attack_target(target_ant, delta)
+					attack_timer = attack_cooldown
+		else:
+			# Enter underground tunnel entrance
+			global_position = Vector2(ENTRANCE_X, UNDERGROUND_Y)
+			velocity = Vector2.ZERO
+			path_waypoints.clear()
+			current_path_index = 0
+			repath_timer = 0.0
+		return
+
+	# 2. Underground stage: strictly navigate through excavated tunnels
+	repath_timer -= delta
+
+	current_target = find_highest_priority_target()
 	if current_target != null and is_instance_valid(current_target):
 		var dist: float = global_position.distance_to(current_target.global_position)
 		if dist <= 28.0:
@@ -49,25 +78,37 @@ func _process_beetle_behavior(delta: float) -> void:
 			if attack_timer <= 0.0:
 				attack_target(current_target, delta)
 				attack_timer = attack_cooldown
-		else:
-			# Advance towards target
-			_move_along_path(delta)
+			return
+
+	if repath_timer <= 0.0 or path_waypoints.is_empty() or current_path_index >= path_waypoints.size():
+		repath_timer = 1.0
+		if current_target != null:
+			_navigate_to_target(current_target.global_position)
+
+	_move_along_path(delta)
 
 func find_highest_priority_target() -> Node2D:
+	# Priority 1: Nearby defending ants within 48 px
+	var nearby_workers: Array = get_tree().get_nodes_in_group("workers")
+	var best_ant: AntController = null
+	var min_ant_dist: float = 48.0
+	for w in nearby_workers:
+		if is_instance_valid(w) and w is AntController:
+			var d: float = global_position.distance_to((w as AntController).global_position)
+			if d < min_ant_dist:
+				min_ant_dist = d
+				best_ant = w as AntController
+	if best_ant != null:
+		return best_ant
+
+	# Priority 2: Queen (Primary subterranean target)
 	var main_node: Node = get_tree().current_scene
-	if main_node == null:
-		return null
-	
-	# 1. Queen (Ultimate objective)
-	var queen: QueenController = main_node.get_node_or_null("Queen") as QueenController
-	
-	# If beetle is underground, targets Queen
-	if global_position.y > 270.0:
-		if queen != null and queen.current_health > 0:
+	if main_node != null:
+		var queen: QueenController = main_node.get_node_or_null("Queen") as QueenController
+		if queen != null and queen.current_health > 0.0:
 			return queen
-	
-	# If near surface, moves toward entrance shaft (Col 30, row 8: 976, 256)
-	return queen
+
+	return null
 
 func attack_target(target: Node2D, delta: float) -> void:
 	if target == null or not is_instance_valid(target):
@@ -84,16 +125,17 @@ func _navigate_to_target(target_world_pos: Vector2) -> void:
 	var start_grid: Vector2i = GridManager.world_to_grid(global_position)
 	var end_grid: Vector2i = GridManager.world_to_grid(target_world_pos)
 	
-	# Beetle tunnels through or uses excavated paths
+	if not GridManager.is_valid_coord(start_grid) or not GridManager.is_valid_coord(end_grid):
+		return
+
 	path_waypoints = GridManager.get_world_path(start_grid, end_grid)
 	current_path_index = 0
+	if path_waypoints.size() > 0 and path_waypoints[0].distance_to(global_position) < 8.0:
+		current_path_index = 1
 
 func _move_along_path(delta: float) -> void:
 	if path_waypoints.is_empty() or current_path_index >= path_waypoints.size():
-		if current_target != null:
-			var dir: Vector2 = (current_target.global_position - global_position).normalized()
-			velocity = dir * move_speed
-			move_and_slide()
+		velocity = Vector2.ZERO
 		return
 	
 	var target_wp: Vector2 = path_waypoints[current_path_index]
@@ -108,7 +150,7 @@ func _move_along_path(delta: float) -> void:
 	var dir: Vector2 = (target_wp - global_position).normalized()
 	velocity = dir * move_speed
 	move_and_slide()
-	if sprite != null and abs(dir.x) > 0.1:
+	if sprite != null and absf(dir.x) > 0.1:
 		sprite.flip_h = (dir.x < 0.0)
 
 func take_damage(amount: float) -> void:
