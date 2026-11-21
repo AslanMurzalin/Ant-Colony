@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=18 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -16,6 +16,7 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/build_menu_controller.tscn" id="14_build"]
 [ext_resource type="Texture2D" path="res://assets/sprites_topdown/anthill_entrance.png" id="15_entrance"]
 [ext_resource type="Texture2D" path="res://assets/sprites_topdown/tree_stump.png" id="16_stump"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ant_roster_controller.tscn" id="17_roster"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -79,6 +80,8 @@ layer = 10
 [node name="PauseMenu" parent="UILayer" instance=ExtResource("12_pause")]
 
 [node name="BuildMenuController" parent="UILayer" instance=ExtResource("14_build")]
+
+[node name="AntRosterController" parent="UILayer" instance=ExtResource("17_roster")]
 
 [node name="ThreatAlertUI" type="CanvasLayer" parent="."]
 layer = 11

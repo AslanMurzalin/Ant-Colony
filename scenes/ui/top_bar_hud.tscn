@@ -82,3 +82,8 @@ tooltip_text = "Normal speed"
 layout_mode = 2
 text = "2×"
 tooltip_text = "Fast speed"
+
+[node name="BtnRoster" type="Button" parent="PanelContainer/HBoxContainer"]
+layout_mode = 2
+text = "📋 Ant Roster [Tab]"
+tooltip_text = "View live activities and status of every ant in the colony"

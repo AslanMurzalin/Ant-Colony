@@ -13,7 +13,15 @@ var color_royal_chamber: Color = Color("#f2c230")
 var color_nursery: Color = Color(0.78, 0.45, 0.72)
 var color_food_store: Color = Color(0.88, 0.62, 0.18)
 
+var _dig_overlay: Node2D = null
+var _progress_throttle_timer: float = 0.0
+
 func _ready() -> void:
+	_dig_overlay = Node2D.new()
+	_dig_overlay.name = "DigOverlay"
+	_dig_overlay.draw.connect(_on_draw_overlay)
+	add_child(_dig_overlay)
+
 	if GridManager != null:
 		GridManager.cell_modified.connect(_on_cell_modified)
 		GridManager.dig_marked.connect(_on_dig_updated)
@@ -22,14 +30,25 @@ func _ready() -> void:
 		GridManager.chamber_designated.connect(_on_chamber_updated)
 		GridManager.chamber_completed.connect(_on_chamber_updated)
 
+func _process(delta: float) -> void:
+	if _progress_throttle_timer > 0.0:
+		_progress_throttle_timer -= delta
+
 func _on_cell_modified(_coords: Vector2i, _new_type: Enums.CellType) -> void:
 	queue_redraw()
+	if _dig_overlay != null:
+		_dig_overlay.queue_redraw()
 
 func _on_dig_updated(_coords: Vector2i) -> void:
-	queue_redraw()
+	if _dig_overlay != null:
+		_dig_overlay.queue_redraw()
 
 func _on_dig_progress(_coords: Vector2i, _progress: float) -> void:
-	queue_redraw()
+	# Throttle overlay redraw to at most 15 FPS so we don't spam draw calls
+	if _progress_throttle_timer <= 0.0:
+		_progress_throttle_timer = 0.066
+		if _dig_overlay != null:
+			_dig_overlay.queue_redraw()
 
 func _on_chamber_updated(_coords: Vector2i, _type: Enums.ChamberType) -> void:
 	queue_redraw()
@@ -70,15 +89,20 @@ func _draw() -> void:
 						draw_rect(rect, color_food_store.darkened(0.65))
 						draw_rect(rect, color_food_store, false, 1.0)
 
-	# Draw Dig Queue Indicators and Progress
+func _on_draw_overlay() -> void:
+	if GridManager == null or _dig_overlay == null:
+		return
+
+	var c_size: Vector2 = GridManager.cell_size
+
+	# Draw Dig Queue Indicators and Progress onto overlay
 	for d_coord in GridManager.dig_queue:
 		var d_rect: Rect2 = Rect2(float(d_coord.x) * c_size.x, float(d_coord.y) * c_size.y, c_size.x, c_size.y)
-		draw_rect(d_rect, color_dig_marker, false, 2.0)
-		draw_line(d_rect.position, d_rect.position + d_rect.size, color_dig_marker, 1.5)
-		draw_line(Vector2(d_rect.position.x + d_rect.size.x, d_rect.position.y), Vector2(d_rect.position.x, d_rect.position.y + d_rect.size.y), color_dig_marker, 1.5)
-		
-		# Draw progress bar if cell is currently being excavated
+		_dig_overlay.draw_rect(d_rect, color_dig_marker, false, 2.0)
+		_dig_overlay.draw_line(d_rect.position, d_rect.position + d_rect.size, color_dig_marker, 1.5)
+		_dig_overlay.draw_line(Vector2(d_rect.position.x + d_rect.size.x, d_rect.position.y), Vector2(d_rect.position.x, d_rect.position.y + d_rect.size.y), color_dig_marker, 1.5)
+
 		var prog: float = GridManager.get_dig_progress(d_coord)
 		if prog > 0.0:
 			var bar_rect: Rect2 = Rect2(d_rect.position.x + 2.0, d_rect.position.y + d_rect.size.y - 6.0, (d_rect.size.x - 4.0) * prog, 4.0)
-			draw_rect(bar_rect, Color(0.2, 0.9, 0.2, 0.9))
+			_dig_overlay.draw_rect(bar_rect, Color(0.2, 0.9, 0.2, 0.9))

@@ -24,18 +24,21 @@ var walk_anim_timer: float = 0.0
 var target_food_source: FoodSource = null
 var target_feed_entity: Node2D = null
 var combat_attack_timer: float = 0.0
+var nurse_wander_timer: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var job_badge: ColorRect = $JobBadge
 @onready var cargo_node: Node2D = $CargoNode
 
 func _ready() -> void:
+	add_to_group("workers")
 	update_job_visuals()
 	update_cargo_visuals()
 
 func _physics_process(delta: float) -> void:
 	if GameManager.game_state == Enums.GameState.RUNNING:
 		execute_job_behavior(delta)
+		_apply_soft_separation(delta)
 	_animate_walk(delta)
 
 func _animate_walk(delta: float) -> void:
@@ -278,24 +281,21 @@ func _tick_nurse() -> void:
 				return
 			
 			if not ResourceManager.has_food(1):
-				var home_pos: Vector2 = Vector2(976.0, 528.0)
-				if global_position.distance_to(home_pos) > 96.0:
-					navigate_to(home_pos)
-					if path_waypoints.size() > 0:
-						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+				_wander_in_chamber()
 				return
 			
 			target_feed_entity = null
 			var main_node: Node = get_tree().current_scene
 			var queen: QueenController = main_node.get_node_or_null("Queen") as QueenController if main_node != null else null
-			if queen != null and (queen.is_starving or queen.hunger_timer < 10.0):
+			
+			# Check if Queen needs food and isn't already targeted by another nurse
+			var queen_needs_food: bool = (queen != null and (queen.is_starving or queen.hunger_timer < 11.0))
+			if queen_needs_food and not _is_entity_targeted_by_another_nurse(queen):
 				target_feed_entity = queen
 			else:
-				var nursery = get_node_or_null("/root/NurseryManager")
-				if nursery != null and nursery.has_method("get_hungry_larva"):
-					var larva: LarvaEntity = nursery.get_hungry_larva()
-					if larva != null:
-						target_feed_entity = larva
+				var larva: LarvaEntity = _find_unclaimed_hungry_larva()
+				if larva != null:
+					target_feed_entity = larva
 			
 			if target_feed_entity != null:
 				var fetch_pos: Vector2 = _find_nearest_food_storage()
@@ -303,18 +303,15 @@ func _tick_nurse() -> void:
 					if ResourceManager.consume_food(1):
 						carried_cargo = "food"
 						update_cargo_visuals()
-						navigate_to(target_feed_entity.global_position)
+						var target_offset: Vector2 = Vector2(randf_range(-14.0, 14.0), randf_range(-8.0, 8.0))
+						navigate_to(target_feed_entity.global_position + target_offset)
 						set_ant_state(Enums.AntState.CARRYING_PAYLOAD)
 				else:
 					navigate_to(fetch_pos)
 					if path_waypoints.size() > 0:
 						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
 			else:
-				var home_pos: Vector2 = Vector2(976.0, 528.0)
-				if global_position.distance_to(home_pos) > 96.0:
-					navigate_to(home_pos)
-					if path_waypoints.size() > 0:
-						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+				_wander_in_chamber()
 
 		Enums.AntState.TRAVELING_TO_TARGET:
 			if target_feed_entity == null:
@@ -332,7 +329,8 @@ func _tick_nurse() -> void:
 					carried_cargo = "food"
 					update_cargo_visuals()
 					if target_feed_entity != null and is_instance_valid(target_feed_entity):
-						navigate_to(target_feed_entity.global_position)
+						var target_offset: Vector2 = Vector2(randf_range(-14.0, 14.0), randf_range(-8.0, 8.0))
+						navigate_to(target_feed_entity.global_position + target_offset)
 						set_ant_state(Enums.AntState.CARRYING_PAYLOAD)
 					else:
 						ResourceManager.add_food(1)
@@ -364,6 +362,53 @@ func _tick_nurse() -> void:
 				carried_cargo = null
 				update_cargo_visuals()
 				set_ant_state(Enums.AntState.IDLE)
+
+func _is_entity_targeted_by_another_nurse(target: Node2D) -> bool:
+	for worker in get_tree().get_nodes_in_group("workers"):
+		if worker != self and worker is AntController:
+			var other: AntController = worker as AntController
+			if other.current_job == Enums.JobType.NURSE and other.target_feed_entity == target:
+				return true
+	return false
+
+func _find_unclaimed_hungry_larva() -> LarvaEntity:
+	var nursery = get_node_or_null("/root/NurseryManager")
+	if nursery == null:
+		return null
+	var larvae: Array = nursery.get("active_larvae")
+	if larvae == null:
+		return null
+	for l in larvae:
+		if is_instance_valid(l) and l is LarvaEntity and (l as LarvaEntity).is_hungry():
+			if not _is_entity_targeted_by_another_nurse(l as Node2D):
+				return l as LarvaEntity
+	return null
+
+func _wander_in_chamber() -> void:
+	nurse_wander_timer -= get_physics_process_delta_time()
+	if nurse_wander_timer <= 0.0:
+		nurse_wander_timer = randf_range(3.0, 7.0)
+		var offset_pos: Vector2 = Vector2(976.0 + randf_range(-36.0, 36.0), 528.0 + randf_range(-14.0, 14.0))
+		navigate_to(offset_pos)
+		if path_waypoints.size() > 0:
+			set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+
+func _apply_soft_separation(delta: float) -> void:
+	var workers: Array = get_tree().get_nodes_in_group("workers")
+	var push_vec: Vector2 = Vector2.ZERO
+	var count: int = 0
+	for other in workers:
+		if other == self or not is_instance_valid(other) or not (other is AntController):
+			continue
+		var dist_sq: float = global_position.distance_squared_to((other as Node2D).global_position)
+		if dist_sq < 144.0 and dist_sq > 0.01: # within 12 px
+			var diff: Vector2 = global_position - (other as Node2D).global_position
+			push_vec += diff.normalized() * (12.0 - sqrt(dist_sq))
+			count += 1
+			if count >= 3:
+				break
+	if count > 0:
+		global_position += push_vec * 2.0 * delta
 
 func _find_nearest_food_storage() -> Vector2:
 	if GridManager != null:
@@ -500,3 +545,55 @@ func update_cargo_visuals() -> void:
 				cargo_rect.color = Color(0.54, 0.35, 0.2, 1.0) # Dirt brown
 			else:
 				cargo_rect.color = Color(0.95, 0.76, 0.19, 1.0) # Food gold
+
+
+func get_action_description() -> String:
+	match current_job:
+		Enums.JobType.FORAGE:
+			match state:
+				Enums.AntState.TRAVELING_TO_TARGET:
+					if target_food_source != null and is_instance_valid(target_food_source):
+						return "Heading to food (%s)" % target_food_source.source_name
+					return "Walking to surface food"
+				Enums.AntState.CARRYING_PAYLOAD:
+					return "Carrying food to storage"
+				Enums.AntState.IDLE:
+					return "Searching for food on surface"
+				_:
+					return "Foraging"
+		Enums.JobType.DIG:
+			match state:
+				Enums.AntState.WORKING:
+					return "Digging block at (%d, %d)" % [target_cell.x, target_cell.y]
+				Enums.AntState.TRAVELING_TO_TARGET:
+					return "Heading to dig site (%d, %d)" % [target_cell.x, target_cell.y]
+				Enums.AntState.IDLE:
+					return "Waiting for dig orders"
+				_:
+					return "Digging"
+		Enums.JobType.NURSE:
+			match state:
+				Enums.AntState.TRAVELING_TO_TARGET:
+					return "Fetching food from storage"
+				Enums.AntState.CARRYING_PAYLOAD:
+					if target_feed_entity is QueenController:
+						return "Feeding the Queen"
+					elif target_feed_entity is LarvaEntity:
+						return "Feeding larva #%d" % (target_feed_entity as LarvaEntity).larva_id
+					return "Delivering food in nursery"
+				Enums.AntState.IDLE:
+					return "Tending to nursery and eggs"
+				_:
+					return "Nursing"
+		Enums.JobType.DEFEND:
+			match state:
+				Enums.AntState.WORKING:
+					return "Attacking intruder!"
+				Enums.AntState.TRAVELING_TO_TARGET:
+					return "Intercepting threat"
+				Enums.AntState.IDLE:
+					return "Guarding nest entrance"
+				_:
+					return "On patrol"
+		_:
+			return "Resting in chamber"

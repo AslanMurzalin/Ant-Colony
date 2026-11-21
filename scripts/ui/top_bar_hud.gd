@@ -4,6 +4,8 @@ extends Control
 ## Top Bar HUD — shows Day, progress bar, Food, Ants, Queen HP, and speed buttons.
 ## Space toggles pause. Buttons set game speed 0x/1x/2x.
 
+signal roster_toggled()
+
 const SPEED_PAUSE: float = 0.0
 const SPEED_1X:    float = 1.0
 const SPEED_2X:    float = 2.0
@@ -16,6 +18,7 @@ const SPEED_2X:    float = 2.0
 @onready var _btn_pause:       Button      = $PanelContainer/HBoxContainer/SpeedButtons/BtnPause
 @onready var _btn_1x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn1x
 @onready var _btn_2x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn2x
+@onready var _btn_roster:      Button      = $PanelContainer/HBoxContainer/BtnRoster
 
 
 func _ready() -> void:
@@ -27,8 +30,14 @@ func _ready() -> void:
 	_btn_pause.connect("pressed", func() -> void: _set_speed(SPEED_PAUSE))
 	_btn_1x.connect("pressed",   func() -> void: _set_speed(SPEED_1X))
 	_btn_2x.connect("pressed",   func() -> void: _set_speed(SPEED_2X))
+	if _btn_roster != null:
+		_btn_roster.connect("pressed", _on_roster_pressed)
 
 	_refresh_all()
+
+
+func _on_roster_pressed() -> void:
+	roster_toggled.emit()
 
 
 func _input(event: InputEvent) -> void:

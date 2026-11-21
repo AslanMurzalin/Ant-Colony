@@ -10,6 +10,8 @@ signal world_initialized()
 @onready var ants_container: Node2D = $Ants
 @onready var grid_cursor: GridCursor = $GridCursor
 @onready var build_menu: BuildMenuController = $UILayer/BuildMenuController
+@onready var top_bar: TopBarHUD = $UILayer/TopBarHUD
+@onready var ant_roster: Control = $UILayer/AntRosterController
 
 var ant_scene: PackedScene = preload("res://scenes/entities/ant.tscn")
 
@@ -18,6 +20,8 @@ func _ready() -> void:
 		build_menu.tool_selected.connect(func(tool_id: int) -> void:
 			grid_cursor.select_tool(tool_id)
 		)
+	if top_bar != null and ant_roster != null:
+		top_bar.roster_toggled.connect(ant_roster.toggle_roster)
 	initialize_world()
 
 func initialize_world() -> void:

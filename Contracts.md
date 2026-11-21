@@ -267,6 +267,8 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Signal handler that queues a canvas redraw when a cell excavation progress updates.
 - `_on_chamber_updated(coords: Vector2i, type: Enums.ChamberType) -> void`
   - *Description:* Signal handler that queues a canvas redraw when a specialized chamber is designated or completed.
+- `_on_draw_overlay() -> void`
+  - *Description:* Draw callback for the dedicated dig overlay node, rendering active dig markers and excavation progress bars without redrawing the terrain.
 
 ---
 
@@ -386,6 +388,16 @@ Base controller for worker ants. Manages locomotion, pathfinding, visual role ba
   - *Description:* Displays or hides carried payload indicator (dirt clump or breadcrumb).
 - `_find_nearest_food_storage() -> Vector2`
   - *Description:* Queries GridManager for the closest designated food store chamber, or falls back to the Royal Chamber.
+- `_is_entity_targeted_by_another_nurse(target: Node2D) -> bool`
+  - *Description:* Checks whether another active nurse ant is already en route to feed the specified entity.
+- `_find_unclaimed_hungry_larva() -> LarvaEntity`
+  - *Description:* Finds a hungry larva from NurseryManager that is not currently targeted by another nurse ant.
+- `_wander_in_chamber() -> void`
+  - *Description:* Periodically steps to a small randomized offset in the chamber so idle nurses do not overlap.
+- `_apply_soft_separation(delta: float) -> void`
+  - *Description:* Gently nudges nearby ants away from each other when within close proximity to prevent sprite stacking.
+- `get_action_description() -> String`
+  - *Description:* Returns human-readable status description of the ant's current activity for the colony roster UI.
 
 ---
 
@@ -680,12 +692,17 @@ Bottom-left HUD with 4 sliders for indirect ant job allocation.
 ### 6.2 `TopBarHUD` (`res://scripts/ui/top_bar_hud.gd`)
 Top HUD strip — Day, day progress bar, Food, Ants alive, Queen HP, speed buttons.
 
+#### Signals
+- `roster_toggled()` — emitted when the Ant Roster button is pressed.
+
 #### Constants
 - `SPEED_PAUSE: float = 0.0`
 - `SPEED_1X: float = 1.0`
 - `SPEED_2X: float = 2.0`
 
 #### Methods
+- `_on_roster_pressed() -> void`
+  - *Description:* Emits `roster_toggled()` when the Ant Roster button is clicked.
 - `_set_speed(speed: float) -> void`
   - *Description:* Calls `GameManager.set_game_speed(speed)` and refreshes button modulate states.
 - `_toggle_pause() -> void`
@@ -815,7 +832,26 @@ Escape-key pause overlay with SFX/Music volume sliders and quit button.
 
 ---
 
-### 6.7 Additions to `GameManager` (Phase 5)
+### 6.7 `AntRosterController` (`res://scripts/ui/ant_roster_controller.gd`)
+Side drawer menu displaying live activity, role, health, and status for every ant in the colony. Toggled via Tab key or TopBarHUD button.
+
+#### Methods
+- `open_roster() -> void`
+  - *Description:* Makes the roster panel visible and initiates an immediate refresh of ant cards.
+- `close_roster() -> void`
+  - *Description:* Hides the ant roster panel.
+- `toggle_roster() -> void`
+  - *Description:* Toggles visibility of the ant roster panel.
+- `refresh_roster() -> void`
+  - *Description:* Queries all active ants in group 'workers', aggregates role counts, and constructs detailed status cards.
+- `_create_ant_card(ant: AntController, ant_index: int) -> PanelContainer`
+  - *Description:* Instantiates a formatted card containing role badge, health, current action text, and camera focus button.
+- `_focus_on_ant(ant: AntController) -> void`
+  - *Description:* Centers the active cross-section camera on the specified ant's world position.
+
+---
+
+### 6.8 Additions to `GameManager` (Phase 5)
 
 #### New Signals
 - `day_progress_ticked(elapsed_ratio: float)` — alias of `day_time_updated`; consumed by `TopBarHUD`.
