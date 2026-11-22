@@ -665,6 +665,8 @@ Root orchestrator in `res://scenes/main/main.tscn`.
   - *Description:* Initializes camera center position and emits `world_initialized()`.
 - `spawn_starter_ants(count: int) -> void`
   - *Description:* Spawns starter worker ants in the royal chamber and apportions initial tasks via `TaskAllocationManager`.
+- `toggle_fullscreen() -> void`
+  - *Description:* Toggles between fullscreen and windowed modes via `DisplayServer`. Bound to `F11` and `Alt+Enter`.
 
 ---
 

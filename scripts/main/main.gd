@@ -49,3 +49,15 @@ func spawn_starter_ants(count: int) -> void:
 		ant.assign_job(Enums.JobType.DEFEND)
 	
 	GameManager.total_workers_alive = count
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_F11 or (event.keycode == KEY_ENTER and event.alt_pressed):
+			toggle_fullscreen()
+
+func toggle_fullscreen() -> void:
+	var mode: DisplayServer.WindowMode = DisplayServer.window_get_mode()
+	if mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_WINDOWED)
+	else:
+		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN)

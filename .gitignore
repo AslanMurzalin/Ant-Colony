@@ -6,3 +6,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# Local run scripts
+run_game.bat
+run_editor.bat
