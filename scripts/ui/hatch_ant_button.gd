@@ -19,7 +19,7 @@ var _queen_node: Node2D = null
 
 func _ready() -> void:
 	# Настройка внешнего вида и подсказки кнопки
-	text = "🥚 Hatch Ant (10 Food)"
+	text = "Hatch Ant"
 	tooltip_text = "Spend 10 food to hatch a new worker ant"
 	
 	# Подключение сигнала нажатия кнопки в синтаксисе Godot 4
