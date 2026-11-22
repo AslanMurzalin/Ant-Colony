@@ -80,24 +80,26 @@ func _fix_grid_opacity() -> void:
 
 
 ## Шаг 3: Выравнивает стволы и корни деревьев — стык точно на SURFACE_Y.
-## SurfaceDecorSpawner размещает tree_node на position.y = surface_y.
-## Внутри tree_node: TreeCrownVisual рисует ствол вверх (y<0),
-## TreeRootVisual рисует корни вниз (y>0) — оба от Vector2.ZERO.
-## Этот шаг принудительно сбрасывает любые случайные смещения.
+## Полоса травы (GrassStrip) сохраняет привязку основания к SURFACE_Y (SURFACE_Y - 36.0).
 func _fix_tree_root_joints() -> void:
 	var surface_decor: Node = get_node_or_null("Background/SurfaceDecor")
 	if surface_decor == null:
 		return
 
-	for tree_node in surface_decor.get_children():
-		if not (tree_node is Node2D):
+	for child in surface_decor.get_children():
+		if not (child is Node2D):
 			continue
-		# Привязываем саму ноду дерева точно к линии поверхности по Y
-		var tp: Vector2 = tree_node.position
-		tree_node.position = Vector2(tp.x, SURFACE_Y)
+		if child is Sprite2D or child.name == "GrassStrip":
+			# Трава должна оставаться на своей позиции (SURFACE_Y - 36.0), чтобы основание сидело на линии земли
+			(child as Node2D).position.y = SURFACE_Y - 36.0
+			continue
+
+		# Дерево (ствол + корни) привязываем точно к линии поверхности по Y
+		var tp: Vector2 = child.position
+		child.position = Vector2(tp.x, SURFACE_Y)
 
 		# Сбрасываем смещения у всех дочерних визуальных узлов (корни + крона)
-		for visual in tree_node.get_children():
+		for visual in child.get_children():
 			if visual is Node2D:
 				visual.position = Vector2.ZERO   # стык гарантирован
 

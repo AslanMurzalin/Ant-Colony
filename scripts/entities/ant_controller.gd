@@ -41,7 +41,7 @@ func _ready() -> void:
 	_init_worker_frames()
 	if sprite != null:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		sprite.scale = Vector2.ONE
+		sprite.scale = Vector2(1.5, 1.5)   # 1.5× — читаемо на 1920×1080
 		if _cached_walk_frames.size() > 0:
 			sprite.texture = _cached_walk_frames[0]
 	update_job_visuals()
@@ -119,16 +119,16 @@ static func _init_worker_frames() -> void:
 		_cached_walk_frames.append(ImageTexture.create_from_image(img))
 
 func _draw() -> void:
-	# Мягкая тень под муравьем для отличной читаемости на светлом песке
-	_draw_shadow_ellipse(Vector2(0.0, 2.0), 6.5, 3.5, Color(0.12, 0.08, 0.04, 0.40))
+	# Мягкая тень под муравьем (масштаб 1.5х) для отличной читаемости на светлом песке
+	_draw_shadow_ellipse(Vector2(0.0, 2.5), 9.0, 5.0, Color(0.12, 0.08, 0.04, 0.40))
 	if is_selected:
-		draw_arc(Vector2.ZERO, 10.0, 0.0, TAU, 16, Color(1.0, 0.9, 0.2, 0.9), 1.5)
+		draw_arc(Vector2.ZERO, 14.0, 0.0, TAU, 16, Color(1.0, 0.9, 0.2, 0.9), 1.5)
 	if is_manually_pinned:
 		draw_colored_polygon(PackedVector2Array([
-			Vector2(0, -18),
-			Vector2(2.5, -15.5),
-			Vector2(0, -13),
-			Vector2(-2.5, -15.5)
+			Vector2(0, -22),
+			Vector2(3.5, -18.5),
+			Vector2(0, -15),
+			Vector2(-3.5, -18.5)
 		]), Color(1.0, 0.85, 0.1, 1.0))
 
 ## Вспомогательная отрисовка эллипса тени

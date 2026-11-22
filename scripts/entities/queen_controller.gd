@@ -31,7 +31,7 @@ func _ready() -> void:
 	if sprite != null:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		sprite.texture = _cached_queen_texture
-		sprite.scale = Vector2.ONE
+		sprite.scale = Vector2(1.5, 1.5)
 	
 	# Скрываем старые реалистичные спрайты кладок яиц (россыпь яиц рисуется процедурно в _draw)
 	var egg_left: Node = get_node_or_null("EggClutchLeft")
@@ -168,7 +168,7 @@ func _update_visuals(delta: float) -> void:
 	var breath_x: float = 1.0 + 0.035 * sin(breath_t)
 	var breath_y: float = 1.0 + 0.015 * sin(breath_t)
 	if sprite != null:
-		sprite.scale = Vector2(breath_x, breath_y)
+		sprite.scale = Vector2(breath_x * 1.5, breath_y * 1.5)
 
 func feed_queen(amount: int) -> bool:
 	if amount <= 0:

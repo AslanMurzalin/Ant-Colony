@@ -120,6 +120,7 @@ func _spawn_tree_with_roots(pos_x: float, pos_y: float, is_background: bool = fa
 func _spawn_grass_strip() -> void:
 	var grass_tex: ImageTexture = _bake_grass_strip()
 	var grass_sprite: Sprite2D = Sprite2D.new()
+	grass_sprite.name = "GrassStrip"
 	grass_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	grass_sprite.texture = grass_tex
 	grass_sprite.centered = false
