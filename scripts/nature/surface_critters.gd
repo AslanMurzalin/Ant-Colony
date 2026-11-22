@@ -41,9 +41,9 @@ func _draw() -> void:
 ## Отрисовка крошечного пиксельного жука (~5px)
 func _draw_mini_beetle(pos: Vector2, motion: float) -> void:
 	# Тень под жучком
-	draw_ellipse(pos + Vector2(0.0, 1.5), 3.5, 2.0, Color(0.1, 0.08, 0.04, 0.4))
+	_draw_critter_ellipse(pos + Vector2(0.0, 1.5), 3.5, 2.0, Color(0.1, 0.08, 0.04, 0.4))
 	# Тело
-	draw_ellipse(pos, 3.0, 2.2, COLOR_BEETLE)
+	_draw_critter_ellipse(pos, 3.0, 2.2, COLOR_BEETLE)
 	# Блик на панцире
 	draw_circle(pos + Vector2(-1.0, -0.8), 0.8, Color(0.35, 0.25, 0.18, 1.0))
 	# Крошечные лапки
@@ -55,7 +55,7 @@ func _draw_mini_beetle(pos: Vector2, motion: float) -> void:
 ## Отрисовка крошечного пиксельного паучка (~6px)
 func _draw_mini_spider(pos: Vector2) -> void:
 	# Тень
-	draw_ellipse(pos + Vector2(0.0, 1.5), 3.0, 1.8, Color(0.1, 0.08, 0.04, 0.35))
+	_draw_critter_ellipse(pos + Vector2(0.0, 1.5), 3.0, 1.8, Color(0.1, 0.08, 0.04, 0.35))
 	# Брюшко и головогрудь
 	draw_circle(pos + Vector2(0.8, 0.0), 1.8, COLOR_SPIDER)
 	draw_circle(pos + Vector2(-1.0, 0.0), 1.3, COLOR_SPIDER)
@@ -68,7 +68,7 @@ func _draw_mini_spider(pos: Vector2) -> void:
 
 
 ## Вспомогательная отрисовка эллипса
-func draw_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void:
+func _draw_critter_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void:
 	var pts: PackedVector2Array = PackedVector2Array()
 	var segs: int = 8
 	for i in range(segs):

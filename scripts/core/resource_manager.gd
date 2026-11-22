@@ -57,3 +57,7 @@ func spoil_food(amount: int) -> void:
 	stored_food = maxi(0, stored_food - actual_loss)
 	food_spoiled.emit(actual_loss)
 	food_changed.emit(stored_food, get_max_capacity())
+
+func reset_food() -> void:
+	stored_food = 10
+	food_changed.emit(stored_food, get_max_capacity())

@@ -58,6 +58,8 @@ func start_new_run(optional_seed: int = -1) -> void:
 	food_gathered_today = 0
 	game_state = Enums.GameState.RUNNING
 	set_game_speed(1.0)
+	if ResourceManager != null and ResourceManager.has_method("reset_food"):
+		ResourceManager.reset_food()
 	day_started.emit(current_day)
 
 func set_game_speed(multiplier: float) -> void:

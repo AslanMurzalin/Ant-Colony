@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=22 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -19,7 +19,6 @@
 [ext_resource type="Script" path="res://scripts/grid/selection_controller.gd" id="18_selection"]
 [ext_resource type="PackedScene" path="res://scenes/ui/selection_popup.tscn" id="19_popup"]
 [ext_resource type="Script" path="res://scripts/nature/surface_decor_spawner.gd" id="20_decor"]
-[ext_resource type="Texture2D" path="res://assets/tiles/smooth_earth_bg.png" id="21_earth"]
 [ext_resource type="Script" path="res://scripts/nature/sky_background.gd" id="22_sky"]
 [ext_resource type="Script" path="res://scripts/nature/soil_background.gd" id="23_soil"]
 [ext_resource type="Script" path="res://scripts/nature/soil_worm.gd" id="24_worm"]

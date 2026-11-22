@@ -79,14 +79,21 @@ func _on_pressed() -> void:
 	
 	# Создаем экземпляр муравья через актуальный для Godot 4 метод instantiate()
 	var new_ant: AntController = ANT_SCENE.instantiate() as AntController
+	if new_ant == null:
+		return
 	new_ant.ant_id = GameManager.get_next_ant_id()
 	new_ant.global_position = spawn_pos
+	new_ant.z_index = 4
 	
 	# Добавляем муравья в контейнер муравьев на сцене
 	if _ants_container != null and is_instance_valid(_ants_container):
 		_ants_container.add_child(new_ant)
 	else:
-		get_tree().current_scene.add_child(new_ant)
+		_find_scene_nodes()
+		if _ants_container != null and is_instance_valid(_ants_container):
+			_ants_container.add_child(new_ant)
+		else:
+			get_tree().current_scene.add_child(new_ant)
 	
 	# Назначаем муравью начальную задачу (по умолчанию защитник)
 	new_ant.assign_job(Enums.JobType.DEFEND)
@@ -102,13 +109,12 @@ func _on_pressed() -> void:
 
 ## Вспомогательный метод поиска узлов на сцене
 func _find_scene_nodes() -> void:
-	var root_scene: Node = get_tree().current_scene
-	if root_scene != null:
-		if _ants_container == null:
-			_ants_container = root_scene.get_node_or_null("Ants") as Node2D
+	var tree: SceneTree = get_tree()
+	if tree == null:
+		return
+	if _ants_container == null or not is_instance_valid(_ants_container):
+		_ants_container = tree.root.find_child("Ants", true, false) as Node2D
+	if _queen_node == null or not is_instance_valid(_queen_node):
+		_queen_node = tree.get_first_node_in_group("queen") as Node2D
 		if _queen_node == null:
-			_queen_node = root_scene.get_node_or_null("Queen") as Node2D
-	
-	# Если не нашли через прямой путь, ищем королеву через группу "queen"
-	if _queen_node == null:
-		_queen_node = get_tree().get_first_node_in_group("queen") as Node2D
+			_queen_node = tree.root.find_child("Queen", true, false) as Node2D

@@ -176,6 +176,8 @@ Tracks food quantities, storage limits, spoil timers, and delivers food to the c
   - *Description:* Returns `stored_food >= amount`.
 - `spoil_food(amount: int) -> void`
   - *Description:* Removes `amount` from `stored_food` due to rain flooding or elapsed spoil ticks in non-chamber caches.
+- `reset_food() -> void`
+  - *Description:* Resets stored food to default 10 units and emits food_changed.
 - `_on_chamber_completed(coords: Vector2i, type: Enums.ChamberType) -> void`
   - *Description:* Signal listener that triggers food capacity recalculation and emits food_changed when a food store chamber is completed.
 
@@ -420,7 +422,7 @@ Base controller for worker ants. Manages locomotion, pathfinding, visual role ba
   - *Description:* Removes manual pinning so the worker returns to slider auto-allocation.
 - `set_selected(selected: bool) -> void`
   - *Description:* Sets selection highlight state and queues visual redraw for the selection ring.
-- `draw_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void`
+- `_draw_shadow_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void`
   - *Description:* Renders an anti-aliased oval ground drop shadow under the ant body.
 
 ---
@@ -685,7 +687,7 @@ Decorative tiny pixel-art beetles and spiders with subtle idle limb twitches in 
     - *Description:* Renders a tiny decorative beetle with drop shadow and shell highlight.
   - `_draw_mini_spider(pos: Vector2) -> void`
     - *Description:* Renders a tiny decorative spider with 4 pairs of splayed legs.
-  - `draw_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void`
+  - `_draw_critter_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void`
     - *Description:* Helper rendering an oval drop shadow polygon under critter bodies.
 
 ### 4.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)

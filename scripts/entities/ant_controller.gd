@@ -42,7 +42,7 @@ func _ready() -> void:
 
 func _draw() -> void:
 	# Мягкая тень под муравьем для отличной читаемости на светлом песке
-	draw_ellipse(Vector2(0.0, 2.0), 6.5, 3.5, Color(0.12, 0.08, 0.04, 0.40))
+	_draw_shadow_ellipse(Vector2(0.0, 2.0), 6.5, 3.5, Color(0.12, 0.08, 0.04, 0.40))
 	if is_selected:
 		draw_arc(Vector2.ZERO, 10.0, 0.0, TAU, 16, Color(1.0, 0.9, 0.2, 0.9), 1.5)
 	if is_manually_pinned:
@@ -54,7 +54,7 @@ func _draw() -> void:
 		]), Color(1.0, 0.85, 0.1, 1.0))
 
 ## Вспомогательная отрисовка эллипса тени
-func draw_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void:
+func _draw_shadow_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void:
 	var pts: PackedVector2Array = PackedVector2Array()
 	var segs: int = 10
 	for i in range(segs):

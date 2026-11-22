@@ -14,6 +14,7 @@ signal world_initialized()
 @onready var ant_roster: Control = $UILayer/AntRosterController
 
 var ant_scene: PackedScene = preload("res://scenes/entities/ant.tscn")
+const SoilBg = preload("res://scripts/nature/soil_background.gd")
 
 # Линия поверхности (Y = 8 строк * 32px = 256)
 const SURFACE_Y: float = 256.0
@@ -44,13 +45,13 @@ func _fix_earth_background() -> void:
 		return
 
 	var old_soil: Node = bg.get_node_or_null("EarthSoil")
-	if old_soil != null and old_soil is SoilBackground:
+	if old_soil != null and old_soil is SoilBg:
 		return
 
 	if old_soil != null:
 		old_soil.queue_free()
 
-	var soil_node: SoilBackground = SoilBackground.new()
+	var soil_node: TextureRect = SoilBg.new() as TextureRect
 	soil_node.name = "EarthSoil"
 	soil_node.offset_left   = -400.0
 	soil_node.offset_top    = SURFACE_Y
@@ -106,6 +107,9 @@ func initialize_world() -> void:
 	if camera != null:
 		camera.center_on_position(Vector2(960.0, 540.0))
 	GameManager.start_new_run()
+	if ResourceManager != null:
+		ResourceManager.stored_food = 10
+		ResourceManager.food_changed.emit(10, ResourceManager.food_capacity)
 	spawn_starter_ants(5)
 	world_initialized.emit()
 
@@ -114,17 +118,29 @@ func spawn_starter_ants(count: int) -> void:
 	if ants_container == null or ant_scene == null:
 		return
 
-	TaskAllocationManager.recalculate_job_targets(count)
 	var spawn_center: Vector2 = Vector2(976.0, 528.0)
+	var initial_roles: Array[Enums.JobType] = [
+		Enums.JobType.FORAGE,
+		Enums.JobType.FORAGE,
+		Enums.JobType.DIG,
+		Enums.JobType.NURSE,
+		Enums.JobType.DEFEND
+	]
 
 	for i in range(count):
 		var ant: AntController = ant_scene.instantiate() as AntController
+		if ant == null:
+			continue
 		ant.ant_id = GameManager.get_next_ant_id()
-		ant.position = spawn_center + Vector2((float(i) - 2.0) * 16.0, 10.0)
+		ant.position = spawn_center + Vector2((float(i) - 2.0) * 20.0, 10.0)
+		ant.z_index = 4
 		ants_container.add_child(ant)
-		ant.assign_job(Enums.JobType.DEFEND)
+		var role: Enums.JobType = initial_roles[i % initial_roles.size()]
+		ant.assign_job(role)
 
 	GameManager.total_workers_alive = count
+	GameManager.ant_count_changed.emit(count, 50)
+	TaskAllocationManager.recalculate_job_targets(count)
 
 
 func _unhandled_input(event: InputEvent) -> void:

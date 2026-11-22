@@ -76,7 +76,7 @@ text = "FOOD"
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "0 / 0"
+text = "10 / 20"
 
 [node name="Sep2" type="VSeparator" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2
@@ -96,7 +96,7 @@ text = "POPULATION"
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 20
-text = "0 / 50"
+text = "5 / 50"
 
 [node name="Sep3" type="VSeparator" parent="PanelContainer/HBoxContainer"]
 layout_mode = 2

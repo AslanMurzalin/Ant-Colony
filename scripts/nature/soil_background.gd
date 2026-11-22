@@ -25,6 +25,7 @@ func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	stretch_mode = TextureRect.STRETCH_SCALE
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	z_index = -10
 	generate_soil()
 
 
