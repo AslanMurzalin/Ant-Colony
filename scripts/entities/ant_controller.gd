@@ -29,16 +29,94 @@ var target_feed_entity: Node2D = null
 var combat_attack_timer: float = 0.0
 var nurse_wander_timer: float = 0.0
 
+static var _cached_walk_frames: Array[ImageTexture] = []
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var job_badge: ColorRect = $JobBadge
 @onready var cargo_node: Node2D = $CargoNode
 
 func _ready() -> void:
 	add_to_group("workers")
+	z_index = 4
+	_init_worker_frames()
 	if sprite != null:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		sprite.scale = Vector2.ONE
+		if _cached_walk_frames.size() > 0:
+			sprite.texture = _cached_walk_frames[0]
 	update_job_visuals()
 	update_cargo_visuals()
+
+static func _init_worker_frames() -> void:
+	if _cached_walk_frames.size() == 3:
+		return
+	var frames_data: Array = [
+		[
+			"....................",
+			"................AA..",
+			"...............A....",
+			"....DDDD.......HHHH.",
+			"..DDDDDDBD...HHHHHEE",
+			".DDDDDDDBDD.HHHHHHHB",
+			".DDDDDDDB.DDHHHHHHB.",
+			"..DDDDDDB..D.HHHHH..",
+			"...DDDD....L..L..L..",
+			"...L........L..L..L.",
+			"..L..........L..L..L",
+			".L............L..L..",
+			"L..............L..L."
+		],
+		[
+			"....................",
+			"...............AA...",
+			"..............A.....",
+			"....DDDD.......HHHH.",
+			"..DDDDDDBD...HHHHHEE",
+			".DDDDDDDBDD.HHHHHHHB",
+			".DDDDDDDB.DDHHHHHHB.",
+			"..DDDDDDB..D.HHHHH..",
+			"...DDDD....L..L..L..",
+			"....L.......L.L.L...",
+			".....L......L.L.L...",
+			"......L.....L.L.L...",
+			".......L....L.L.L..."
+		],
+		[
+			"....................",
+			"................AA..",
+			"...............A....",
+			"....DDDD.......HHHH.",
+			"..DDDDDDBD...HHHHHEE",
+			".DDDDDDDBDD.HHHHHHHB",
+			".DDDDDDDB.DDHHHHHHB.",
+			"..DDDDDDB..D.HHHHH..",
+			"...DDDD....L..L..L..",
+			".....L.....L..L...L.",
+			"......L...L....L...L",
+			".......L.L......L...",
+			"........L........L.."
+		]
+	]
+	var pal: Dictionary = {
+		'B': Color(0.125, 0.071, 0.043, 1.0),
+		'D': Color(0.169, 0.102, 0.063, 1.0),
+		'H': Color(0.227, 0.137, 0.086, 1.0),
+		'E': Color(0.92, 0.86, 0.78, 1.0),
+		'L': Color(0.137, 0.078, 0.047, 1.0),
+		'A': Color(0.137, 0.078, 0.047, 1.0),
+	}
+	_cached_walk_frames.clear()
+	for f_lines in frames_data:
+		var img: Image = Image.create(20, 13, false, Image.FORMAT_RGBA8)
+		for y in range(13):
+			var line: String = f_lines[y]
+			for x in range(20):
+				var ch: String = line[x]
+				if pal.has(ch):
+					img.set_pixel(x, y, pal[ch])
+				else:
+					img.set_pixel(x, y, Color(0.0, 0.0, 0.0, 0.0))
+		_cached_walk_frames.append(ImageTexture.create_from_image(img))
 
 func _draw() -> void:
 	# Мягкая тень под муравьем для отличной читаемости на светлом песке
@@ -70,16 +148,19 @@ func _physics_process(delta: float) -> void:
 
 func _animate_walk(delta: float) -> void:
 	if velocity.length() > 1.0:
-		walk_anim_timer += delta * 8.0
-		var bob: float = sin(walk_anim_timer) * 1.5
-		if sprite != null:
+		walk_anim_timer += delta * 10.0
+		var frame_idx: int = int(walk_anim_timer) % 3
+		var bob: float = sin(walk_anim_timer) * 0.8
+		if sprite != null and _cached_walk_frames.size() > frame_idx:
+			sprite.texture = _cached_walk_frames[frame_idx]
 			sprite.position.y = bob
 			if velocity.x < -0.1:
 				sprite.flip_h = true
 			elif velocity.x > 0.1:
 				sprite.flip_h = false
 	else:
-		if sprite != null:
+		if sprite != null and _cached_walk_frames.size() > 0:
+			sprite.texture = _cached_walk_frames[0]
 			sprite.position.y = 0.0
 
 func assign_job(new_job: Enums.JobType) -> void:
@@ -557,28 +638,21 @@ func take_damage(amount: float) -> void:
 
 func update_job_visuals() -> void:
 	var badge_color: Color = Color(0.8, 0.8, 0.8, 1.0)
-	var tex_path: String = "res://assets/sprites_topdown/worker_forager.png"
 	match current_job:
 		Enums.JobType.FORAGE:
 			badge_color = Color(0.2, 0.55, 0.95, 1.0) # Blue
-			tex_path = "res://assets/sprites_topdown/worker_forager.png"
 		Enums.JobType.DIG:
 			badge_color = Color(0.9, 0.5, 0.13, 1.0) # Orange
-			tex_path = "res://assets/sprites_topdown/worker_digger.png"
 		Enums.JobType.NURSE:
 			badge_color = Color(0.18, 0.8, 0.44, 1.0) # Green
-			tex_path = "res://assets/sprites_topdown/worker_nurse.png"
 		Enums.JobType.DEFEND:
 			badge_color = Color(0.9, 0.3, 0.24, 1.0) # Red
-			tex_path = "res://assets/sprites_topdown/worker_defender.png"
 		_:
 			badge_color = Color(0.7, 0.7, 0.7, 1.0)
 	
 	if job_badge != null:
 		job_badge.color = badge_color
 	if sprite != null:
-		if ResourceLoader.exists(tex_path):
-			sprite.texture = load(tex_path)
 		sprite.modulate = Color.WHITE
 
 func update_cargo_visuals() -> void:

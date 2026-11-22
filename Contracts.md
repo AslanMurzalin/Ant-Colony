@@ -277,6 +277,10 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Signal handler that queues a canvas redraw when a specialized chamber is designated or completed.
 - `_on_draw_overlay() -> void`
   - *Description:* Draw callback for the dedicated dig overlay node, rendering active dig markers and excavation progress bars without redrawing the terrain.
+- `_rebuild_tunnel_texture() -> void`
+  - *Description:* Builds organic smoothed subterranean tunnels (antcolony.gg style): generates 8x8 px per cell mask, performs separable 5x5 box blur, applies threshold with organic noise, renders ambient occlusion, earthy crumbled soil rim, and chamber tints into ImageTexture.
+- `_draw_chamber_icons() -> void`
+  - *Description:* Renders clean minimalist pixel icons for specialized chambers (Nursery eggs, Storage grain).
 - `_draw_tunnel_cell(coords: Vector2i, rect: Rect2) -> void`
   - *Description:* Renders a dark tunnel void (#1a1005) with rounded inner corners (polygon), top/left wall shading for depth, a soil-coloured rim at SOIL-bordered edges, and chamber tint overlay if applicable.
 - `_rounded_rect_polygon(rect: Rect2, r: float, segs: int) -> PackedVector2Array`

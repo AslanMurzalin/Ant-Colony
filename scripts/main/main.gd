@@ -63,14 +63,13 @@ func _fix_earth_background() -> void:
 	bg.move_child(soil_node, 0)
 
 
-## Шаг 2: Делает сетку (GridView / TileMap / TileMapLayer) почти прозрачной.
+## Шаг 2: Обеспечивает полную видимость GridView и прозрачность остаточных TileMap.
 func _fix_grid_opacity() -> void:
-	# GridView — наш кастомный рендерер сетки
 	var grid_view: Node = get_node_or_null("GridView")
-	if grid_view != null:
-		grid_view.modulate = Color(1.0, 1.0, 1.0, 0.05)
+	if grid_view != null and grid_view is CanvasItem:
+		(grid_view as CanvasItem).modulate = Color.WHITE
 
-	# На случай если в сцене есть TileMap или TileMapLayer
+	# На случай если в сцене остался старый TileMap или TileMapLayer
 	var tilemap: Node = get_node_or_null("TileMap")
 	if tilemap == null:
 		tilemap = find_child("TileMap", true, false)

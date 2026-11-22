@@ -19,13 +19,28 @@ var is_starving: bool = false
 var starvation_damage_rate: float = 2.0
 var distress_timer: float = 0.0
 
+static var _cached_queen_texture: ImageTexture = null
+
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var health_bar: ProgressBar = $HealthBar
 
 func _ready() -> void:
 	add_to_group("queen")
+	z_index = 4
+	_init_queen_texture()
 	if sprite != null:
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		sprite.texture = _cached_queen_texture
+		sprite.scale = Vector2.ONE
+	
+	# Скрываем старые реалистичные спрайты кладок яиц (россыпь яиц рисуется процедурно в _draw)
+	var egg_left: Node = get_node_or_null("EggClutchLeft")
+	if egg_left != null and egg_left is CanvasItem:
+		(egg_left as CanvasItem).visible = false
+	var egg_right: Node = get_node_or_null("EggClutchRight")
+	if egg_right != null and egg_right is CanvasItem:
+		(egg_right as CanvasItem).visible = false
+
 	current_health = max_health
 	hunger_timer = hunger_interval
 	egg_laying_timer = egg_laying_interval
@@ -34,6 +49,57 @@ func _ready() -> void:
 		health_bar.max_value = max_health
 		health_bar.value = current_health
 	queen_health_changed.emit(current_health, max_health)
+
+static func _init_queen_texture() -> void:
+	if _cached_queen_texture != null:
+		return
+	var lines: Array = [
+		"..........................................",
+		"................................C.C.C.....",
+		".................................CJC......",
+		"..............................AA..C.......",
+		".............................A............",
+		"............................A...HHHH......",
+		"........DDDDDDD............A..HHHHHHEE....",
+		".....DDDDDDDDDDDDD...........HHHHHHHHE....",
+		"...DDDDDDDDDDDDDDDDD........HHHHHHHHHQ....",
+		"..DDDDDQQQQQQQDDDDDDD.WW...HHHHHHHHHHQ....",
+		".DDDDDQQQQQQQQQDDDDDDDWWWW.HHHHHHHHHH.....",
+		".DDDDQQQQQQQQQQQDDDDDDWWWWW.HHHHHHHH......",
+		"DDDDQQQQQQQQQQQQQDDDDDWWWWW..HHHHHH.......",
+		"DDDDQQQQQQQQQQQQQDDDDDWWWWW...HHHH........",
+		".DDDDQQQQQQQQQQQDDDDDD.WWWW...L..L..L.....",
+		".DDDDDQQQQQQQQQDDDDDDD..WW...L..L....L....",
+		"..DDDDDQQQQQQQDDDDDDD.......L..L......L...",
+		"...DDDDDDDDDDDDDDDDD.......L..L........L..",
+		".....DDDDDDDDDDDDD........L..L..........L.",
+		"........DDDDDDD..........L..L............L",
+		"..........................................",
+		"..........................................",
+		"..........................................",
+		".........................................."
+	]
+	var pal: Dictionary = {
+		'Q': Color(0.478, 0.227, 0.133, 1.0), # #7A3A22 Queen reddish brown
+		'D': Color(0.333, 0.149, 0.078, 1.0), # #552614 Dark segment stripes
+		'H': Color(0.608, 0.298, 0.180, 1.0), # #9B4C2E Highlight
+		'W': Color(0.353, 0.165, 0.094, 1.0), # Waist / Thorax connection
+		'C': Color(0.949, 0.761, 0.114, 1.0), # #F2C21D Gold crown
+		'J': Color(0.831, 0.176, 0.118, 1.0), # Crown ruby
+		'E': Color(1.0, 0.96, 0.90, 1.0),     # Eye
+		'L': Color(0.255, 0.110, 0.059, 1.0), # Leg
+		'A': Color(0.255, 0.110, 0.059, 1.0), # Antenna
+	}
+	var img: Image = Image.create(42, 24, false, Image.FORMAT_RGBA8)
+	for y in range(24):
+		var line: String = lines[y]
+		for x in range(42):
+			var ch: String = line[x]
+			if pal.has(ch):
+				img.set_pixel(x, y, pal[ch])
+			else:
+				img.set_pixel(x, y, Color(0.0, 0.0, 0.0, 0.0))
+	_cached_queen_texture = ImageTexture.create_from_image(img)
 
 func _draw() -> void:
 	# 1. Органическая темная подстилка гнезда (земля и листья) под королевой
@@ -97,9 +163,12 @@ func _update_visuals(delta: float) -> void:
 	else:
 		modulate = Color(1.0, 1.0, 1.0, 1.0)
 	
-	# Subtle breathing animation
-	var breath: float = 1.0 + 0.03 * sin(Time.get_ticks_msec() * 0.003)
-	scale = Vector2(breath, breath)
+	# Subtle breathing animation on queen body
+	var breath_t: float = Time.get_ticks_msec() * 0.0025
+	var breath_x: float = 1.0 + 0.035 * sin(breath_t)
+	var breath_y: float = 1.0 + 0.015 * sin(breath_t)
+	if sprite != null:
+		sprite.scale = Vector2(breath_x, breath_y)
 
 func feed_queen(amount: int) -> bool:
 	if amount <= 0:

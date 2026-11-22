@@ -8,18 +8,19 @@
 script = ExtResource("1_queen")
 
 [node name="EggClutchLeft" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(-42, 14)
 scale = Vector2(0.55, 0.55)
 texture = ExtResource("3_eggs")
 
 [node name="EggClutchRight" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(40, 16)
 scale = Vector2(0.55, 0.55)
 texture = ExtResource("3_eggs")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-scale = Vector2(1.15, 1.15)
-texture = ExtResource("2_texture")
+texture_filter = 1
 
 [node name="HealthBar" type="ProgressBar" parent="."]
 offset_left = -36.0
