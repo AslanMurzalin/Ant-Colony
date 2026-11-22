@@ -602,6 +602,19 @@ Button for manually hatching worker ants from the colony's stored food supply.
   - `_find_scene_nodes() -> void`
     - *Description:* Helper to locate Queen node and Ants container on the current scene.
 
+### 4.2.2 `SurfaceDecorSpawner` (`res://scripts/nature/surface_decor_spawner.gd`)
+Procedural decorator scattering surface trees, stumps, stones, bushes, and flowers along the grass layer.
+- **Properties:**
+  - `surface_y: float = 256.0`
+  - `map_width: float = 1920.0`
+  - `entrance_x: float = 976.0`
+  - `entrance_clear_radius: float = 80.0`
+- **Methods:**
+  - `generate_surface_decorations() -> void`
+    - *Description:* Clears existing children and spawns large and small props across map width avoiding anthill entrance.
+  - `_spawn_prop(texture_path: String, pos_x: float, pos_y: float, min_scale: float, max_scale: float) -> void`
+    - *Description:* Instantiates a Sprite2D prop with bottom-center pivot offset, randomized scale, and jittered position.
+
 ### 4.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)
 - **Methods:**
   - `show_summary(day: int, stats: Dictionary) -> void`
