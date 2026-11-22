@@ -612,6 +612,8 @@ Procedural decorator scattering surface trees, stumps, stones, bushes, and flowe
 - **Methods:**
   - `generate_surface_decorations() -> void`
     - *Description:* Clears existing children and spawns large and small props across map width avoiding anthill entrance.
+  - `_spawn_tree_with_roots(pos_x: float, pos_y: float) -> void`
+    - *Description:* Spawns a tall canopy tree on the surface with organic roots extending down into the sandy earth layer.
   - `_spawn_prop(texture_path: String, pos_x: float, pos_y: float, min_scale: float, max_scale: float) -> void`
     - *Description:* Instantiates a Sprite2D prop with bottom-center pivot offset, randomized scale, and jittered position.
 

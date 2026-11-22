@@ -3,10 +3,10 @@ extends Node2D
 
 # Visual renderer for the underground soil grid, rocks, excavated tunnels, and dig markers.
 
-var color_soil: Color = Color(0.424, 0.275, 0.200) # Warm soil #6c4633
-var color_deep_soil: Color = Color(0.320, 0.200, 0.140) # Deep subsoil #523324
-var color_rock: Color = Color(0.18, 0.16, 0.15)
-var color_tunnel: Color = Color(0.59, 0.39, 0.22, 0.30)
+var color_soil: Color = Color(0.87, 0.77, 0.56) # Sandy earth from reference
+var color_deep_soil: Color = Color(0.75, 0.67, 0.55) # Deep sandy earth
+var color_rock: Color = Color(0.32, 0.30, 0.28)
+var color_tunnel: Color = Color(0.32, 0.20, 0.12, 0.95) # Dark hollow dug tunnel
 var color_water: Color = Color(0.29, 0.56, 0.85, 0.75)
 var color_dig_marker: Color = Color("#f08a24")
 var color_royal_chamber: Color = Color("#f2c230")
@@ -68,25 +68,25 @@ func _draw() -> void:
 
 			match c_type:
 				Enums.CellType.SOIL:
-					var fill_col: Color = color_deep_soil if y >= 28 else color_soil
-					draw_rect(rect, fill_col)
-					draw_rect(rect, fill_col.darkened(0.15), false, 1.0)
+					# Subtle semi-transparent grid line over seamless sandy earth background
+					draw_rect(rect, Color(0.42, 0.32, 0.20, 0.18), false, 1.0)
 				Enums.CellType.ROCK:
 					draw_rect(rect, color_rock)
 					draw_rect(rect, color_rock.lightened(0.2), false, 1.5)
 				Enums.CellType.WATER:
 					draw_rect(rect, color_water)
 				Enums.CellType.AIR:
+					# Dark hollow excavated tunnel
 					draw_rect(rect, color_tunnel)
 					var chamber: Enums.ChamberType = GridManager.get_chamber_type(coords)
 					if chamber == Enums.ChamberType.ROYAL:
-						draw_rect(rect, color_royal_chamber.darkened(0.65))
+						draw_rect(rect, Color(0.85, 0.65, 0.25, 0.40))
 						draw_rect(rect, color_royal_chamber, false, 1.0)
 					elif chamber == Enums.ChamberType.NURSERY:
-						draw_rect(rect, color_nursery.darkened(0.65))
+						draw_rect(rect, Color(0.78, 0.45, 0.72, 0.40))
 						draw_rect(rect, color_nursery, false, 1.0)
 					elif chamber == Enums.ChamberType.FOOD_STORE:
-						draw_rect(rect, color_food_store.darkened(0.65))
+						draw_rect(rect, Color(0.88, 0.62, 0.18, 0.40))
 						draw_rect(rect, color_food_store, false, 1.0)
 
 func _on_draw_overlay() -> void:

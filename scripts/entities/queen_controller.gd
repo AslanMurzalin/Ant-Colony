@@ -27,10 +27,18 @@ func _ready() -> void:
 	current_health = max_health
 	hunger_timer = hunger_interval
 	egg_laying_timer = egg_laying_interval
+	queue_redraw()
 	if health_bar != null:
 		health_bar.max_value = max_health
 		health_bar.value = current_health
 	queen_health_changed.emit(current_health, max_health)
+
+func _draw() -> void:
+	# Органическая подстилка гнезда (листья и почва) под королевой как на референсе
+	draw_set_transform(Vector2(0.0, 8.0), 0.0, Vector2(1.85, 0.95))
+	draw_circle(Vector2.ZERO, 38.0, Color(0.28, 0.20, 0.12, 0.85))
+	draw_circle(Vector2.ZERO, 34.0, Color(0.42, 0.32, 0.18, 0.90))
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 func _process(delta: float) -> void:
 	if GameManager.game_state == Enums.GameState.RUNNING:
