@@ -24,6 +24,8 @@ var distress_timer: float = 0.0
 
 func _ready() -> void:
 	add_to_group("queen")
+	if sprite != null:
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	current_health = max_health
 	hunger_timer = hunger_interval
 	egg_laying_timer = egg_laying_interval
@@ -34,11 +36,37 @@ func _ready() -> void:
 	queen_health_changed.emit(current_health, max_health)
 
 func _draw() -> void:
-	# Органическая подстилка гнезда (листья и почва) под королевой как на референсе
-	draw_set_transform(Vector2(0.0, 8.0), 0.0, Vector2(1.85, 0.95))
-	draw_circle(Vector2.ZERO, 38.0, Color(0.28, 0.20, 0.12, 0.85))
-	draw_circle(Vector2.ZERO, 34.0, Color(0.42, 0.32, 0.18, 0.90))
+	# 1. Органическая темная подстилка гнезда (земля и листья) под королевой
+	draw_set_transform(Vector2(0.0, 8.0), 0.0, Vector2(1.9, 1.0))
+	draw_circle(Vector2.ZERO, 40.0, Color(0.20, 0.13, 0.07, 0.90)) # #332112
+	draw_circle(Vector2.ZERO, 35.0, Color(0.32, 0.22, 0.12, 0.95))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+	# 2. Россыпь белых яиц и светлых личинок вокруг королевы (стиль antcolony.gg)
+	# Точки и овалы белого, кремового и нежно-желтого оттенков
+	var egg_col_white: Color = Color(0.98, 0.98, 0.96, 0.95)
+	var egg_col_cream: Color = Color(0.94, 0.91, 0.82, 0.95)
+	var egg_col_shadow: Color = Color(0.24, 0.16, 0.09, 0.6)
+
+	var egg_offsets: Array[Vector2] = [
+		Vector2(-42, 4), Vector2(-36, -6), Vector2(-48, 10), Vector2(-38, 14),
+		Vector2(-28, 18), Vector2(-44, -2), Vector2(-32, 8), Vector2(-24, 22),
+		Vector2(26, 18), Vector2(34, 12), Vector2(42, 6), Vector2(38, -4),
+		Vector2(46, 10), Vector2(28, 22), Vector2(48, -2), Vector2(36, 16),
+		Vector2(-12, 22), Vector2(0, 24), Vector2(12, 22), Vector2(-6, 26),
+		Vector2(6, 26), Vector2(-18, 20), Vector2(18, 20), Vector2(-52, 6),
+		Vector2(52, 4), Vector2(-30, -10), Vector2(32, -8)
+	]
+
+	for i in range(egg_offsets.size()):
+		var ep: Vector2 = egg_offsets[i]
+		# Тень под яйцом
+		draw_circle(ep + Vector2(0.5, 0.8), 2.8, egg_col_shadow)
+		# Сами яйца и личинки
+		var col: Color = egg_col_white if (i % 2 == 0) else egg_col_cream
+		draw_circle(ep, 2.4, col)
+		# Блик
+		draw_circle(ep + Vector2(-0.5, -0.5), 0.8, Color.WHITE)
 
 func _process(delta: float) -> void:
 	if GameManager.game_state == Enums.GameState.RUNNING:

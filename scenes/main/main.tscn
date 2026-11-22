@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=22 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -22,6 +22,8 @@
 [ext_resource type="Texture2D" path="res://assets/tiles/smooth_earth_bg.png" id="21_earth"]
 [ext_resource type="Script" path="res://scripts/nature/sky_background.gd" id="22_sky"]
 [ext_resource type="Script" path="res://scripts/nature/soil_background.gd" id="23_soil"]
+[ext_resource type="Script" path="res://scripts/nature/soil_worm.gd" id="24_worm"]
+[ext_resource type="Script" path="res://scripts/nature/surface_critters.gd" id="25_critters"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -43,6 +45,17 @@ offset_right = 2400.0
 offset_bottom = 1400.0
 mouse_filter = 2
 script = ExtResource("23_soil")
+
+[node name="Worm1" type="Node2D" parent="Background"]
+position = Vector2(380, 480)
+script = ExtResource("24_worm")
+
+[node name="Worm2" type="Node2D" parent="Background"]
+position = Vector2(1420, 620)
+script = ExtResource("24_worm")
+
+[node name="SurfaceCritters" type="Node2D" parent="Background"]
+script = ExtResource("25_critters")
 
 [node name="SurfaceDecor" type="Node2D" parent="Background"]
 script = ExtResource("20_decor")

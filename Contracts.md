@@ -420,6 +420,8 @@ Base controller for worker ants. Manages locomotion, pathfinding, visual role ba
   - *Description:* Removes manual pinning so the worker returns to slider auto-allocation.
 - `set_selected(selected: bool) -> void`
   - *Description:* Sets selection highlight state and queues visual redraw for the selection ring.
+- `draw_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void`
+  - *Description:* Renders an anti-aliased oval ground drop shadow under the ant body.
 
 ---
 
@@ -664,6 +666,25 @@ Procedural multi-layer sandy subsoil generator in antcolony.gg style with wavy d
     - *Description:* Generates a 2-layer sand-beige soil texture with dithered wavy layer boundaries, sand grain noise, and depth gradient, baked into ImageTexture with NEAREST filter.
   - `_draw_mineral_deposits(img: Image, rnd: RandomNumberGenerator) -> void`
     - *Description:* Renders irregular soft-edged grey stone deposits (#8A8A8A) and blue crystal mineral veins (#5F7FA8) distributed across subterranean depths.
+
+### 4.2.4 `SoilWorm` (`res://scripts/nature/soil_worm.gd`)
+Decorative subterranean segmented pink earthworm slowly undulating within unexcavated soil.
+- **Properties:**
+  - `worm_color: Color`
+  - `worm_shadow: Color`
+  - `segment_count: int`
+  - `segment_radius: float`
+  - `crawl_speed: float`
+
+### 4.2.5 `SurfaceCritters` (`res://scripts/nature/surface_critters.gd`)
+Decorative tiny pixel-art beetles and spiders with subtle idle limb twitches in the surface grass.
+- **Methods:**
+  - `_draw_mini_beetle(pos: Vector2, motion: float) -> void`
+    - *Description:* Renders a tiny decorative beetle with drop shadow and shell highlight.
+  - `_draw_mini_spider(pos: Vector2) -> void`
+    - *Description:* Renders a tiny decorative spider with 4 pairs of splayed legs.
+  - `draw_ellipse(center: Vector2, rx: float, ry: float, col: Color) -> void`
+    - *Description:* Helper rendering an oval drop shadow polygon under critter bodies.
 
 ### 4.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)
 - **Methods:**
