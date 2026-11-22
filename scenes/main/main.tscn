@@ -1,4 +1,4 @@
-[gd_scene load_steps=22 format=3 uid="uid://cx60m3kq7y0a"]
+[gd_scene load_steps=23 format=3 uid="uid://cx60m3kq7y0a"]
 
 [ext_resource type="Script" path="res://scripts/main/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/core/camera_controller.gd" id="2_camera"]
@@ -24,6 +24,7 @@
 [ext_resource type="Script" path="res://scripts/nature/soil_background.gd" id="23_soil"]
 [ext_resource type="Script" path="res://scripts/nature/soil_worm.gd" id="24_worm"]
 [ext_resource type="Script" path="res://scripts/nature/surface_critters.gd" id="25_critters"]
+[ext_resource type="PackedScene" path="res://scenes/ui/tile_tooltip.tscn" id="26_tooltip"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -97,6 +98,8 @@ layer = 10
 [node name="PauseMenu" parent="UILayer" instance=ExtResource("12_pause")]
 
 [node name="BuildMenuController" parent="UILayer" instance=ExtResource("14_build")]
+
+[node name="TileTooltip" parent="UILayer" instance=ExtResource("26_tooltip")]
 
 [node name="AntRosterController" parent="UILayer" instance=ExtResource("17_roster")]
 

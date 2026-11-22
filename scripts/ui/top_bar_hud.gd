@@ -1,8 +1,8 @@
 class_name TopBarHUD
 extends Control
 
-## Top Bar HUD — shows Day, progress bar, Food, Ants, Queen HP, and speed buttons.
-## Space toggles pause. Buttons set game speed 0x/1x/2x.
+## Top Bar HUD — стилизованная панель antcolony.gg (#1A1512).
+## Отображает Day, Food, Population, Queen HP, кнопки скорости и кнопку Roster.
 
 signal roster_toggled()
 
@@ -10,11 +10,17 @@ const SPEED_PAUSE: float = 0.0
 const SPEED_1X:    float = 1.0
 const SPEED_2X:    float = 2.0
 
-@onready var _day_label:       Label       = $PanelContainer/HBoxContainer/DayLabel
-@onready var _day_bar:         ProgressBar = $PanelContainer/HBoxContainer/DayBar
-@onready var _food_label:      Label       = $PanelContainer/HBoxContainer/FoodLabel
-@onready var _ants_label:      Label       = $PanelContainer/HBoxContainer/AntsLabel
-@onready var _queen_hp_bar:    ProgressBar = $PanelContainer/HBoxContainer/QueenHPBar
+const COLOR_GOLD_ACCENT: Color = Color(0.949, 0.659, 0.114, 1.0) # #F2A81D
+const COLOR_DARK_BG: Color     = Color(0.102, 0.082, 0.071, 1.0) # #1A1512
+const COLOR_BUTTON_BG: Color   = Color(0.150, 0.120, 0.100, 1.0) # #261F1A
+const COLOR_BUTTON_TEXT: Color = Color(0.850, 0.800, 0.750, 1.0)
+
+@onready var _day_label:       Label       = $PanelContainer/HBoxContainer/DayBlock/DayLabel
+@onready var _day_bar:         ProgressBar = $PanelContainer/HBoxContainer/DayBlock/DayBar
+@onready var _food_label:      Label       = $PanelContainer/HBoxContainer/FoodBlock/FoodLabel
+@onready var _ants_label:      Label       = $PanelContainer/HBoxContainer/AntsBlock/AntsLabel
+@onready var _queen_label:     Label       = $PanelContainer/HBoxContainer/QueenBlock/QueenLabel
+@onready var _queen_hp_bar:    ProgressBar = $PanelContainer/HBoxContainer/QueenBlock/QueenHPBar
 @onready var _btn_pause:       Button      = $PanelContainer/HBoxContainer/SpeedButtons/BtnPause
 @onready var _btn_1x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn1x
 @onready var _btn_2x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn2x
@@ -35,8 +41,26 @@ func _ready() -> void:
 	_btn_2x.connect("pressed",   func() -> void: _set_speed(SPEED_2X))
 	if _btn_roster != null:
 		_btn_roster.connect("pressed", _on_roster_pressed)
+		_style_roster_button()
 
 	_refresh_all()
+
+
+func _style_roster_button() -> void:
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
+	sb.bg_color = COLOR_BUTTON_BG
+	sb.border_color = COLOR_GOLD_ACCENT
+	sb.border_width_left = 1
+	sb.border_width_top = 1
+	sb.border_width_right = 1
+	sb.border_width_bottom = 1
+	sb.corner_radius_top_left = 4
+	sb.corner_radius_top_right = 4
+	sb.corner_radius_bottom_right = 4
+	sb.corner_radius_bottom_left = 4
+	_btn_roster.add_theme_stylebox_override("normal", sb)
+	_btn_roster.add_theme_stylebox_override("hover", sb)
+	_btn_roster.add_theme_color_override("font_color", COLOR_GOLD_ACCENT)
 
 
 func _on_roster_pressed() -> void:
@@ -63,53 +87,86 @@ func _toggle_pause() -> void:
 
 
 func _update_speed_buttons(speed: float) -> void:
-	_btn_pause.modulate = Color.WHITE if speed == SPEED_PAUSE else Color(0.6, 0.6, 0.6)
-	_btn_1x.modulate    = Color.WHITE if speed == SPEED_1X    else Color(0.6, 0.6, 0.6)
-	_btn_2x.modulate    = Color.WHITE if speed == SPEED_2X    else Color(0.6, 0.6, 0.6)
+	_apply_speed_style(_btn_pause, speed == SPEED_PAUSE)
+	_apply_speed_style(_btn_1x,    speed == SPEED_1X)
+	_apply_speed_style(_btn_2x,    speed == SPEED_2X)
+
+
+func _apply_speed_style(btn: Button, is_active: bool) -> void:
+	if btn == null:
+		return
+	var sb: StyleBoxFlat = StyleBoxFlat.new()
+	sb.corner_radius_top_left = 4
+	sb.corner_radius_top_right = 4
+	sb.corner_radius_bottom_right = 4
+	sb.corner_radius_bottom_left = 4
+	
+	if is_active:
+		sb.bg_color = COLOR_GOLD_ACCENT
+		btn.add_theme_color_override("font_color", COLOR_DARK_BG)
+		btn.add_theme_color_override("font_hover_color", COLOR_DARK_BG)
+	else:
+		sb.bg_color = COLOR_BUTTON_BG
+		sb.border_color = Color(0.24, 0.18, 0.14, 1.0)
+		sb.border_width_left = 1
+		sb.border_width_top = 1
+		sb.border_width_right = 1
+		sb.border_width_bottom = 1
+		btn.add_theme_color_override("font_color", COLOR_BUTTON_TEXT)
+		btn.add_theme_color_override("font_hover_color", Color.WHITE)
+		
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", sb)
+	btn.add_theme_stylebox_override("pressed", sb)
 
 
 # ── Signal handlers ──────────────────────────────────────────────────────────
 
 func _on_day_started(day: int) -> void:
-	_day_label.text = "Day %d / 10" % day
+	_day_label.text = "%d / 10" % day
 	_day_bar.value = 0.0
 
 
 func _on_day_progress(pct: float) -> void:
 	_day_bar.value = pct * 100.0
-	# Refresh Queen HP each progress tick (cheap)
 	_refresh_queen_hp()
 
 
 func _on_food_changed(current: int, capacity: int) -> void:
-	_food_label.text = "Food: %d / %d" % [current, capacity]
+	_food_label.text = "%d / %d" % [current, capacity]
 
 
 func _on_ant_count_changed(alive: int, _max: int) -> void:
 	_update_ants_label(alive)
 
+
 func _update_ants_label(alive: int = -1) -> void:
 	if alive < 0:
 		alive = GameManager.total_workers_alive
-	_ants_label.text = "Ants: %d / 50" % alive
+	_ants_label.text = "%d / 50" % alive
+
 
 # ── Refresh helpers ──────────────────────────────────────────────────────────
 
 func _refresh_all() -> void:
-	_day_label.text   = "Day %d / 10" % GameManager.current_day
+	_day_label.text   = "%d / 10" % GameManager.current_day
 	_day_bar.value    = 0.0
-	_food_label.text  = "Food: %d / %d" % [ResourceManager.stored_food, ResourceManager.food_capacity]
+	_food_label.text  = "%d / %d" % [ResourceManager.stored_food, ResourceManager.food_capacity]
 	_update_ants_label(GameManager.total_workers_alive)
 	_refresh_queen_hp()
 	_update_speed_buttons(Engine.time_scale)
 
 
 func _refresh_queen_hp() -> void:
-	# Retrieve queen node from group "queen"
 	var queens: Array = get_tree().get_nodes_in_group("queen")
 	if queens.is_empty():
 		_queen_hp_bar.value = 100.0
+		if _queen_label != null:
+			_queen_label.text = "100%"
 		return
 	var queen: Node = queens[0]
 	if queen.has_method("get_health_pct"):
-		_queen_hp_bar.value = queen.get_health_pct() * 100.0
+		var pct: float = queen.get_health_pct()
+		_queen_hp_bar.value = pct * 100.0
+		if _queen_label != null:
+			_queen_label.text = "%d%%" % int(pct * 100.0)

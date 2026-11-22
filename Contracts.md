@@ -598,6 +598,8 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
   - `select_tool(tool_id: int) -> void`
   - `handle_grid_click(cell_coords: Vector2i) -> void`
   - `_update_button_highlights() -> void`
+  - `_apply_tool_style(btn: Button, is_active: bool) -> void`
+    - *Description:* Applies a `StyleBoxFlat` with gold border `#F2A81D` for active tool button, dim `#241C17` for inactive; updates `font_color` overrides accordingly.
 
 ### 4.2.1 `HatchAntButton` (`res://scripts/ui/hatch_ant_button.gd`)
 Button for manually hatching worker ants from the colony's stored food supply.
@@ -842,6 +844,10 @@ Top HUD strip — Day, day progress bar, Food, Ants alive, Queen HP, speed butto
   - *Description:* Full refresh of all HUD elements; called in `_ready()`.
 - `_refresh_queen_hp() -> void`
   - *Description:* Queries first node in group `"queen"` for `get_health_pct()` and sets `_queen_hp_bar.value`.
+- `_apply_speed_style(btn: Button, is_active: bool) -> void`
+  - *Description:* Applies a `StyleBoxFlat` to `btn`. Active: gold background `#F2A81D`, dark text `#1A1512`. Inactive: dark `#261F1A` background with dim border and muted text.
+- `_style_roster_button() -> void`
+  - *Description:* Applies dark background `#1A1512` with gold `#F2A81D` border and font color to the Ant Roster button at startup.
 
 ---
 
@@ -997,6 +1003,8 @@ Controls Shift+RMB box selection of worker ants in the world, renders selection 
 
 ---
 
+---
+
 ### 6.9 `SelectionPopup` (`res://scripts/ui/selection_popup.gd`)
 Floating context menu that appears after selecting ants with Shift+RMB, allowing rapid direct role assignment or unpinning.
 
@@ -1016,6 +1024,29 @@ Floating context menu that appears after selecting ants with Shift+RMB, allowing
   - *Description:* Emits `unpin_chosen` and hides the popup.
 - `_on_close_pressed() -> void`
   - *Description:* Closes the popup without making changes.
+
+---
+
+### 6.10 `TileTooltip` (`res://scripts/ui/tile_tooltip.gd`)
+Info card displayed in the bottom-right corner showing hovered cell metadata (antcolony.gg style).
+Anchored to bottom-right of UILayer at `offset_top = -215, offset_bottom = -118`.
+
+#### Properties
+- `label_category: Label` — gold caps header (e.g. `TILE · SOIL`, `CHAMBER · ROYAL`)
+- `label_title: Label` — large white title
+- `label_desc: Label` — muted description
+- `label_hardness: Label` — hardness value (`Soft`, `Hard`, `Liquid`, `Hollow`)
+- `label_depth: Label` — depth from surface in centimetres
+
+#### Methods
+- `_connect_cursor() -> void`
+  - *Description:* Finds `GridCursor` node in scene tree and connects `hover_cell_changed` signal to `_on_hover_cell_changed`.
+- `_on_hover_cell_changed(coords: Vector2i, is_valid: bool) -> void`
+  - *Description:* Signal handler; delegates to `update_info`.
+- `update_info(coords: Vector2i, is_valid: bool) -> void`
+  - *Description:* Queries `GridManager` for cell type and chamber type at `coords`, populates all label fields. Falls back to `_display_sky()` for above-surface or invalid coords.
+- `_display_sky() -> void`
+  - *Description:* Sets labels to sky defaults: category `TILE · SKY`, title `Open Sky`, hardness `None`, depth `0 cm`.
 
 ---
 

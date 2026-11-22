@@ -1,7 +1,23 @@
-[gd_scene load_steps=3 format=3 uid="uid://build_menu_controller"]
+[gd_scene load_steps=4 format=3 uid="uid://build_menu_controller"]
 
 [ext_resource type="Script" path="res://scripts/ui/build_menu_controller.gd" id="1_script"]
 [ext_resource type="Script" path="res://scripts/ui/hatch_ant_button.gd" id="2_hatch"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.102, 0.082, 0.071, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.18, 0.14, 0.9)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
 
 [node name="BuildMenuController" type="Control"]
 layout_mode = 3
@@ -36,6 +52,7 @@ offset_left = -340.0
 offset_top = -62.0
 offset_right = -16.0
 offset_bottom = -16.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="HBox" type="HBoxContainer" parent="Panel"]
 layout_mode = 2
