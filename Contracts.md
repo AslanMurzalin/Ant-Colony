@@ -608,6 +608,24 @@ Button for manually hatching worker ants from the colony's stored food supply.
   - `_find_scene_nodes() -> void`
     - *Description:* Helper to locate Queen node and Ants container on the current scene.
 
+### 4.2.1 `SkyBackground` (`res://scripts/nature/sky_background.gd`)
+Procedural pixel-art sky, fluffy clouds, and 3-layer rolling misty hills generator in the antcolony.gg mosaic aesthetic.
+- **Properties:**
+  - `const FIXED_SEED: int = 133742`
+  - `const TEX_WIDTH: int = 700`
+  - `const TEX_HEIGHT: int = 164`
+- **Methods:**
+  - `generate_sky_and_hills() -> void`
+    - *Description:* Generates procedural sky gradient with dither, pixel clouds, and three layers of rolling hills into an Image and bakes it into ImageTexture with NEAREST filter.
+  - `_render_sky_gradient(img: Image) -> void`
+    - *Description:* Renders vertical dithered sky gradient (#8EC5E8 to #D6ECF7) into image buffer.
+  - `_render_clouds(img: Image) -> void`
+    - *Description:* Renders pixelated cloud puffs with white tops and soft blue underside shading.
+  - `_draw_pixel_cloud(img: Image, cx: int, cy: int, scale: float) -> void`
+    - *Description:* Draws an individual multi-puff pixel cloud with base cutoff into the image.
+  - `_render_hills(img: Image) -> void`
+    - *Description:* Renders 3 distant rolling hill layers with atmospheric haze and a horizon grass blend.
+
 ### 4.2.2 `SurfaceDecorSpawner` (`res://scripts/nature/surface_decor_spawner.gd`)
 Procedural decorator scattering surface trees, stumps, stones, bushes, and flowers along the grass layer.
 - **Properties:**
