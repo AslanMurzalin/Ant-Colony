@@ -1,4 +1,4 @@
-class_name GridView
+﻿class_name GridView
 extends Node2D
 
 # Visual renderer for the underground soil grid, rocks, excavated tunnels, and dig markers.
@@ -68,8 +68,8 @@ func _draw() -> void:
 
 			match c_type:
 				Enums.CellType.SOIL:
-					# Undisturbed smooth earth — no harsh square lines
-					pass
+					# Едва заметная сетка (alpha=0.05) - не перекрывает фон земли
+					draw_rect(rect, Color(0.0, 0.0, 0.0, 0.05), false, 0.5)
 				Enums.CellType.ROCK:
 					draw_rect(rect, color_rock)
 					draw_rect(rect, color_rock.lightened(0.2), false, 1.5)
