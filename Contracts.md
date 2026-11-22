@@ -589,6 +589,19 @@ Coordinates threat wave generation, warning alert timers, and environmental disa
   - `handle_grid_click(cell_coords: Vector2i) -> void`
   - `_update_button_highlights() -> void`
 
+### 4.2.1 `HatchAntButton` (`res://scripts/ui/hatch_ant_button.gd`)
+Button for manually hatching worker ants from the colony's stored food supply.
+- **Constants:** `ANT_COST: int = 10`, `MAX_ANTS: int = 50`
+- **Methods:**
+  - `can_hatch() -> bool`
+    - *Description:* Returns true if food is >= 10 and alive ant population is < 50.
+  - `_update_button_state() -> void`
+    - *Description:* Sets disabled state based on `can_hatch()`.
+  - `_on_pressed() -> void`
+    - *Description:* Spends 10 food, instantiates `Ant.tscn` at Queen's position with random offset, registers born ant.
+  - `_find_scene_nodes() -> void`
+    - *Description:* Helper to locate Queen node and Ants container on the current scene.
+
 ### 4.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)
 - **Methods:**
   - `show_summary(day: int, stats: Dictionary) -> void`

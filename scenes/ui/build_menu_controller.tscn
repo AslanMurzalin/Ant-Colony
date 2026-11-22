@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3 uid="uid://build_menu_controller"]
+[gd_scene load_steps=3 format=3 uid="uid://build_menu_controller"]
 
 [ext_resource type="Script" path="res://scripts/ui/build_menu_controller.gd" id="1_script"]
+[ext_resource type="Script" path="res://scripts/ui/hatch_ant_button.gd" id="2_hatch"]
 
 [node name="BuildMenuController" type="Control"]
 layout_mode = 3
@@ -9,6 +10,20 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
 script = ExtResource("1_script")
+
+[node name="HatchButton" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -220.0
+offset_top = -92.0
+offset_right = -8.0
+offset_bottom = -58.0
+text = "🥚 Родить муравья (10 еды)"
+script = ExtResource("2_hatch")
 
 [node name="Panel" type="PanelContainer" parent="."]
 layout_mode = 1
