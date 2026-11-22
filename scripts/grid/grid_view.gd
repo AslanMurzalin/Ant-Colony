@@ -68,8 +68,8 @@ func _draw() -> void:
 
 			match c_type:
 				Enums.CellType.SOIL:
-					# Subtle semi-transparent grid line over seamless sandy earth background
-					draw_rect(rect, Color(0.42, 0.32, 0.20, 0.18), false, 1.0)
+					# Undisturbed smooth earth — no harsh square lines
+					pass
 				Enums.CellType.ROCK:
 					draw_rect(rect, color_rock)
 					draw_rect(rect, color_rock.lightened(0.2), false, 1.5)
