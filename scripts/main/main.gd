@@ -109,8 +109,7 @@ func initialize_world() -> void:
 		camera.center_on_position(Vector2(960.0, 540.0))
 	GameManager.start_new_run()
 	if ResourceManager != null:
-		ResourceManager.stored_food = 10
-		ResourceManager.food_changed.emit(10, ResourceManager.food_capacity)
+		ResourceManager.reset_food()
 	spawn_starter_ants(5)
 	world_initialized.emit()
 

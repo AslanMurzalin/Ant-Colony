@@ -154,20 +154,43 @@ Controls the indirect slider-based task distribution. Enforces that percentages 
 ### 2.3 `ResourceManager` (Autoload: `res://scripts/core/resource_manager.gd`)
 Tracks food quantities, storage limits, spoil timers, and delivers food to the colony.
 
+#### Constants
+- `CAPACITY_PER_STORAGE_CELL: int = 5`
+- `BASE_QUEEN_STORAGE_CAPACITY: int = 10`
+
 #### Properties
 - `stored_food: int` (Current available food units)
-- `base_storage_capacity: int` (Default 20 units)
-- `extra_capacity_per_store: int` (15 units per Food Store chamber)
+- `base_storage_capacity: int` (Default 10 units)
+- `extra_capacity_per_store: int` (5 units per Food Store chamber)
+- `queen_stored_food: int` (Food stored in Queen chamber pantry)
+- `cell_food_storage: Dictionary` (Vector2i -> int mapping of food per storage cell)
 - `food_burn_timer: float` (Periodic worker food consumption tick)
 
 #### Signals
 - `food_changed(current_food: int, max_food: int)`
 - `food_spoiled(amount: int)`
 - `colony_starving()`
+- `storage_updated()`
 
 #### Methods
+- `get_reachable_storage_cells() -> Array[Vector2i]`
+  - *Description:* Returns an array of coordinates of `FOOD_STORE` cells accessible by dug tunnel from the colony.
 - `get_max_capacity() -> int`
-  - *Description:* Returns `base_storage_capacity + (GridManager.get_chamber_count(Enums.ChamberType.FOOD_STORE) * extra_capacity_per_store)`.
+  - *Description:* Returns `BASE_QUEEN_STORAGE_CAPACITY + get_reachable_storage_cells().size() * CAPACITY_PER_STORAGE_CELL`.
+- `has_available_storage_space() -> bool`
+  - *Description:* Returns `true` if `stored_food < get_max_capacity()`.
+- `get_cell_food(coords: Vector2i) -> int`
+  - *Description:* Returns the amount of food stored in a specific storage cell coordinate.
+- `find_best_deposit_cell(from_world_pos: Vector2) -> Vector2i`
+  - *Description:* Finds the nearest reachable storage cell with free space (<5 units), or falls back to Queen chamber (30, 16) if Queen pantry has space (<10 units). Returns `(-1, -1)` if full.
+- `deposit_food(target_cell: Vector2i, amount: int = 1) -> int`
+  - *Description:* Deposits food into `target_cell` granary or Queen chamber, recalculates total, and emits `storage_updated`.
+- `find_nearest_food_source_cell(from_world_pos: Vector2) -> Vector2i`
+  - *Description:* Finds the closest storage cell or Queen chamber with available food for nurse ants.
+- `consume_food_from_cell(cell: Vector2i, amount: int = 1) -> bool`
+  - *Description:* Consumes food directly from specified cell or Queen chamber.
+- `_recalculate_stored_food() -> void`
+  - *Description:* Synchronizes `stored_food` to strictly match `queen_stored_food + sum(cell_food_storage.values())`. Emits `food_changed` and `storage_updated`.
 - `add_food(amount: int) -> int`
   - *Description:* Deposits food into storage up to maximum capacity. Returns the amount successfully stored. Emits `food_changed`.
 - `consume_food(amount: int) -> bool`
@@ -177,9 +200,11 @@ Tracks food quantities, storage limits, spoil timers, and delivers food to the c
 - `spoil_food(amount: int) -> void`
   - *Description:* Removes `amount` from `stored_food` due to rain flooding or elapsed spoil ticks in non-chamber caches.
 - `reset_food() -> void`
-  - *Description:* Resets stored food to default 10 units and emits food_changed.
+  - *Description:* Resets stored food to default 10 units in Queen chamber, clears granary cells, and emits food_changed.
 - `_on_chamber_completed(coords: Vector2i, type: Enums.ChamberType) -> void`
   - *Description:* Signal listener that triggers food capacity recalculation and emits food_changed when a food store chamber is completed.
+- `_on_cell_modified(coords: Vector2i, new_type: Enums.CellType) -> void`
+  - *Description:* Re-evaluates granary cell if terrain is modified, relocating food to Queen chamber if destroyed.
 
 ---
 
@@ -252,6 +277,8 @@ Manages the underground 2D discrete cell grid, soil tiles, rock barriers, excava
   - *Description:* Computes lightweight A* path between two grid cells, traversing only walkable excavated cells. If destination is solid soil, paths to adjacent reachable cell.
 - `get_world_path(start_cell: Vector2i, end_cell: Vector2i) -> Array[Vector2]`
   - *Description:* Converts grid coordinate path from `get_path_between` into an ordered array of central pixel world positions.
+- `is_cell_reachable_from_colony(coords: Vector2i) -> bool`
+  - *Description:* Returns `true` if there is a valid, unblocked subterranean path from the colony (Royal Chamber) to `coords`.
 
 ---
 
@@ -281,6 +308,12 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Builds organic smoothed subterranean tunnels (antcolony.gg style): generates 8x8 px per cell mask, performs separable 5x5 box blur, applies threshold with organic noise, renders ambient occlusion, earthy crumbled soil rim, and chamber tints into ImageTexture.
 - `_draw_chamber_icons() -> void`
   - *Description:* Renders clean minimalist pixel icons for specialized chambers (Nursery eggs, Storage grain).
+- `_draw_storage_granary(center: Vector2, coords: Vector2i) -> void`
+  - *Description:* Renders food storage mat and piles of pixel grain/fruit corresponding to cell fill level (empty, 1/3, 2/3, full).
+- `_draw_pixel_grain(pos: Vector2) -> void`
+  - *Description:* Draws an individual pixel golden grain crumb with shadow and highlight.
+- `_draw_mini_apple(pos: Vector2) -> void`
+  - *Description:* Draws an individual mini pixel fruit/apple with stem and leaf.
 - `_draw_tunnel_cell(coords: Vector2i, rect: Rect2) -> void`
   - *Description:* Renders a dark tunnel void (#1a1005) with rounded inner corners (polygon), top/left wall shading for depth, a soil-coloured rim at SOIL-bordered edges, and chamber tint overlay if applicable.
 - `_rounded_rect_polygon(rect: Rect2, r: float, segs: int) -> PackedVector2Array`
@@ -493,6 +526,7 @@ Tracks eggs and larvae inside the nursery, managing incubation and maturation ti
   - `harvest_unit() -> int`
   - `get_remaining_food() -> int`
   - `_update_display() -> void`
+  - `_on_storage_food_changed(_cur: int, _max: int) -> void` — callback for ResourceManager.food_changed; refreshes surface food label, shows [Full] in orange when storage is at capacity.
 
 #### `FoodSpawner` (`res://scripts/economy/food_spawner.gd`)
 - `active_sources: Array[FoodSource]`

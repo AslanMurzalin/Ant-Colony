@@ -20,6 +20,11 @@ func _ready() -> void:
 		var apple_tex_path: String = "res://assets/sprites_topdown/food_apple.png"
 		if ResourceLoader.exists(apple_tex_path):
 			sprite.texture = load(apple_tex_path)
+	if ResourceManager != null and ResourceManager.has_signal("food_changed"):
+		ResourceManager.connect("food_changed", Callable(self, "_on_storage_food_changed"))
+	_update_display()
+
+func _on_storage_food_changed(_cur: int, _max: int) -> void:
 	_update_display()
 
 func harvest_unit() -> int:
@@ -42,7 +47,15 @@ func get_remaining_food() -> int:
 
 func _update_display() -> void:
 	if count_label != null:
-		count_label.text = "%d" % food_units
+		var is_full: bool = false
+		if ResourceManager != null and ResourceManager.has_method("has_available_storage_space"):
+			is_full = not ResourceManager.has_available_storage_space()
+		if is_full:
+			count_label.text = "%d [Full]" % food_units
+			count_label.add_theme_color_override("font_color", Color(1.0, 0.55, 0.2))
+		else:
+			count_label.text = "%d" % food_units
+			count_label.remove_theme_color_override("font_color")
 	queue_redraw()
 
 func _draw() -> void:

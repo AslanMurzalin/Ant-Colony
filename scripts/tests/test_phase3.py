@@ -52,15 +52,26 @@ class MockFoodSpawner:
 
 
 class MockResourceManager:
-    def __init__(self, base_cap=20, extra_per_store=15):
+    CAPACITY_PER_STORAGE_CELL = 5
+    BASE_QUEEN_STORAGE_CAPACITY = 10
+
+    def __init__(self, base_cap=10, capacity_per_cell=5):
+        self.queen_stored_food = 10
         self.stored_food = 10
         self.base_storage_capacity = base_cap
-        self.extra_capacity_per_store = extra_per_store
-        self.food_store_chambers = 0
+        self.capacity_per_cell = capacity_per_cell
+        self.cell_food_storage = {}
+        self.reachable_cells = set()
         self.starving = False
 
     def get_max_capacity(self) -> int:
-        return self.base_storage_capacity + (self.food_store_chambers * self.extra_capacity_per_store)
+        return self.base_storage_capacity + (len(self.reachable_cells) * self.capacity_per_cell)
+
+    def has_available_storage_space(self) -> bool:
+        return self.stored_food < self.get_max_capacity()
+
+    def get_cell_food(self, coords) -> int:
+        return self.cell_food_storage.get(coords, 0)
 
     def add_food(self, amount: int) -> int:
         max_cap = self.get_max_capacity()
@@ -205,23 +216,24 @@ class TestPhase3(unittest.TestCase):
         self.assertEqual(nearest_after, fruit)
 
     def test_food_store_chambers_and_capacity(self):
-        res_mgr = MockResourceManager(base_cap=20, extra_per_store=15)
-        # Base capacity without store chambers
-        self.assertEqual(res_mgr.get_max_capacity(), 20)
+        res_mgr = MockResourceManager(base_cap=10, capacity_per_cell=5)
+        # Base capacity without store chambers (queen base = 10)
+        self.assertEqual(res_mgr.get_max_capacity(), 10)
 
-        # Add 1 food store chamber -> capacity becomes 35
-        res_mgr.food_store_chambers += 1
-        self.assertEqual(res_mgr.get_max_capacity(), 35)
+        # Add 1 food store chamber cell -> capacity becomes 15
+        res_mgr.reachable_cells.add((10, 10))
+        self.assertEqual(res_mgr.get_max_capacity(), 15)
 
-        # Add another food store chamber -> capacity becomes 50
-        res_mgr.food_store_chambers += 1
-        self.assertEqual(res_mgr.get_max_capacity(), 50)
+        # Add 2 more food store chamber cells -> capacity becomes 25
+        res_mgr.reachable_cells.add((10, 11))
+        res_mgr.reachable_cells.add((10, 12))
+        self.assertEqual(res_mgr.get_max_capacity(), 25)
 
         # Adding food respects max capacity
-        res_mgr.stored_food = 48
+        res_mgr.stored_food = 23
         added = res_mgr.add_food(5)
         self.assertEqual(added, 2)
-        self.assertEqual(res_mgr.stored_food, 50)
+        self.assertEqual(res_mgr.stored_food, 25)
 
     def test_nursery_incubation_and_feeding(self):
         nursery = MockNurseryManager()

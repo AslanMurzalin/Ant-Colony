@@ -86,8 +86,13 @@ func update_info(coords: Vector2i, is_valid: bool) -> void:
 				Enums.ChamberType.FOOD_STORE:
 					label_category.text = "CHAMBER · STORAGE"
 					label_title.text = "Food Granary"
-					label_desc.text = "Resource stockpile"
-					label_hardness.text = "Hollow"
+					var stored: int = 0
+					var cap: int = 5
+					if ResourceManager != null:
+						stored = ResourceManager.get_cell_food(coords)
+						cap = ResourceManager.CAPACITY_PER_STORAGE_CELL
+					label_desc.text = "Stored %d / %d" % [stored, cap]
+					label_hardness.text = "Stockpile"
 					label_depth.text = "%d cm" % depth_cm
 				_:
 					label_category.text = "TILE · TUNNEL"

@@ -259,3 +259,16 @@ func get_world_path(start_cell: Vector2i, end_cell: Vector2i) -> Array[Vector2]:
 		world_path.append(grid_to_world(c))
 	return world_path
 
+
+## Проверяет, существует ли непрерывный проходимый туннель от колонии (королевской камеры) до клетки
+func is_cell_reachable_from_colony(coords: Vector2i) -> bool:
+	if not is_valid_coord(coords) or astar == null:
+		return false
+	if astar.is_point_solid(coords):
+		return false
+	var royal_center: Vector2i = Vector2i(30, 16)
+	if coords == royal_center:
+		return true
+	var path: Array[Vector2i] = get_path_between(royal_center, coords)
+	return path.size() > 0
+

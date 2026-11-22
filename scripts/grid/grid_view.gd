@@ -65,6 +65,9 @@ func _ready() -> void:
 		GridManager.chamber_designated.connect(_on_chamber_updated)
 		GridManager.chamber_completed.connect(_on_chamber_updated)
 
+	if ResourceManager != null and ResourceManager.has_signal("storage_updated"):
+		ResourceManager.connect("storage_updated", queue_redraw)
+
 	_is_tunnel_dirty = true
 	queue_redraw()
 
@@ -299,8 +302,53 @@ func _draw_chamber_icons() -> void:
 					draw_circle(center, 3.5, Color(0.78, 0.45, 0.72, 0.8))
 					draw_circle(center + Vector2(-0.5, -0.5), 2.2, Color(0.98, 0.95, 0.90, 0.95))
 				Enums.ChamberType.FOOD_STORE:
-					draw_circle(center, 3.5, Color(0.88, 0.62, 0.18, 0.8))
-					draw_circle(center, 2.0, Color(1.0, 0.85, 0.4, 0.95))
+					_draw_storage_granary(center, coords)
+
+
+## Отрисовка кучек еды в кладовой камере в зависимости от степени заполнения
+func _draw_storage_granary(center: Vector2, coords: Vector2i) -> void:
+	# Тёплый подстилочный коврик кладовой на полу клетки
+	draw_rect(Rect2(center.x - 12.0, center.y + 6.0, 24.0, 6.0), Color(0.42, 0.28, 0.14, 0.65))
+	draw_rect(Rect2(center.x - 10.0, center.y + 7.5, 20.0, 3.5), Color(0.88, 0.62, 0.18, 0.30))
+
+	var stored: int = 0
+	if ResourceManager != null and ResourceManager.has_method("get_cell_food"):
+		stored = ResourceManager.get_cell_food(coords)
+
+	if stored <= 0:
+		# Пустой склад: золотистый силуэт зёрнышка
+		draw_circle(center + Vector2(0.0, 2.0), 2.5, Color(0.88, 0.62, 0.18, 0.40))
+	elif stored <= 2:
+		# Заполнение ~1/3: 2 зёрнышка
+		_draw_pixel_grain(center + Vector2(-4.0, 5.5))
+		_draw_pixel_grain(center + Vector2(3.5, 5.5))
+	elif stored <= 4:
+		# Заполнение ~2/3: яблоко + зёрна
+		_draw_mini_apple(center + Vector2(0.0, 2.5))
+		_draw_pixel_grain(center + Vector2(-6.5, 6.5))
+		_draw_pixel_grain(center + Vector2(6.5, 6.5))
+	else:
+		# Полный склад (5 ед.): пышная горка с яблоками и зёрнами
+		_draw_mini_apple(center + Vector2(-3.5, 1.5))
+		_draw_mini_apple(center + Vector2(4.5, 2.5))
+		_draw_pixel_grain(center + Vector2(-7.5, 6.5))
+		_draw_pixel_grain(center + Vector2(0.0, 7.0))
+		_draw_pixel_grain(center + Vector2(8.0, 6.5))
+		draw_circle(center + Vector2(0.0, -2.5), 1.2, Color(1.0, 0.95, 0.65, 0.85))
+
+
+func _draw_pixel_grain(pos: Vector2) -> void:
+	draw_circle(pos + Vector2(0.5, 0.5), 2.0, Color(0.18, 0.10, 0.04, 0.55))
+	draw_circle(pos, 1.8, Color(0.92, 0.72, 0.22, 0.95))
+	draw_circle(pos + Vector2(-0.5, -0.5), 0.7, Color(1.0, 0.95, 0.80, 1.0))
+
+
+func _draw_mini_apple(pos: Vector2) -> void:
+	draw_circle(pos + Vector2(0.5, 0.5), 3.4, Color(0.18, 0.08, 0.04, 0.55))
+	draw_circle(pos, 3.0, Color(0.85, 0.22, 0.18, 0.95))
+	draw_circle(pos + Vector2(-0.8, -0.8), 0.9, Color(1.0, 0.65, 0.60, 0.95))
+	draw_line(pos + Vector2(0.0, -2.5), pos + Vector2(0.0, -4.5), Color(0.35, 0.20, 0.10, 1.0), 1.0)
+	draw_circle(pos + Vector2(1.2, -4.0), 1.0, Color(0.35, 0.72, 0.25, 0.95))
 
 
 # ── Слой разметки копания (Dig Overlay) ─────────────────────────────────────────

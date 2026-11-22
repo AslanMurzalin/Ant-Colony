@@ -347,6 +347,15 @@ func _tick_forage() -> void:
 			if current_job != Enums.JobType.FORAGE:
 				return
 			
+			# Если все склады и база королевы переполнены — муравей не бегает впустую
+			if not ResourceManager.has_available_storage_space():
+				var entrance_pos: Vector2 = Vector2(976.0, 256.0)
+				if global_position.distance_to(entrance_pos) > 48.0:
+					navigate_to(entrance_pos)
+					if path_waypoints.size() > 0:
+						set_ant_state(Enums.AntState.TRAVELING_TO_TARGET)
+				return
+			
 			var spawner: FoodSpawner = null
 			var main_node: Node = get_tree().current_scene
 			if main_node != null:
@@ -384,12 +393,18 @@ func _tick_forage() -> void:
 			if reached or dist <= 24.0:
 				path_waypoints.clear()
 				velocity = Vector2.ZERO
+				if not ResourceManager.has_available_storage_space():
+					target_food_source = null
+					set_ant_state(Enums.AntState.IDLE)
+					return
 				var harvested: int = target_food_source.harvest_unit()
 				if harvested > 0:
 					carried_cargo = "food"
 					update_cargo_visuals()
 					target_food_source = null
-					var deposit_pos: Vector2 = _find_nearest_food_storage()
+					var deposit_cell: Vector2i = ResourceManager.find_best_deposit_cell(global_position)
+					var deposit_pos: Vector2 = GridManager.grid_to_world(deposit_cell) if deposit_cell != Vector2i(-1, -1) else Vector2(976.0, 528.0)
+					target_cell = deposit_cell
 					navigate_to(deposit_pos)
 					set_ant_state(Enums.AntState.CARRYING_PAYLOAD)
 				else:
@@ -402,7 +417,7 @@ func _tick_forage() -> void:
 			if reached_deposit or dist <= 28.0:
 				path_waypoints.clear()
 				velocity = Vector2.ZERO
-				ResourceManager.add_food(1)
+				ResourceManager.deposit_food(target_cell, 1)
 				GameManager.food_gathered_today += 1
 				carried_cargo = null
 				update_cargo_visuals()
@@ -433,9 +448,11 @@ func _tick_nurse() -> void:
 					target_feed_entity = larva
 			
 			if target_feed_entity != null:
-				var fetch_pos: Vector2 = _find_nearest_food_storage()
+				var fetch_cell: Vector2i = ResourceManager.find_nearest_food_source_cell(global_position)
+				var fetch_pos: Vector2 = GridManager.grid_to_world(fetch_cell) if fetch_cell != Vector2i(-1, -1) else Vector2(976.0, 528.0)
+				target_cell = fetch_cell
 				if global_position.distance_to(fetch_pos) <= 24.0:
-					if ResourceManager.consume_food(1):
+					if ResourceManager.consume_food_from_cell(fetch_cell, 1):
 						carried_cargo = "food"
 						update_cargo_visuals()
 						var target_offset: Vector2 = Vector2(randf_range(-14.0, 14.0), randf_range(-8.0, 8.0))
@@ -460,7 +477,7 @@ func _tick_nurse() -> void:
 			if reached or dist <= 24.0:
 				path_waypoints.clear()
 				velocity = Vector2.ZERO
-				if ResourceManager.consume_food(1):
+				if ResourceManager.consume_food_from_cell(target_cell, 1):
 					carried_cargo = "food"
 					update_cargo_visuals()
 					if target_feed_entity != null and is_instance_valid(target_feed_entity):
@@ -546,6 +563,12 @@ func _apply_soft_separation(delta: float) -> void:
 		global_position += push_vec * 2.0 * delta
 
 func _find_nearest_food_storage() -> Vector2:
+	if ResourceManager != null and ResourceManager.has_method("find_best_deposit_cell"):
+		var cell: Vector2i = ResourceManager.find_best_deposit_cell(global_position)
+		if cell != Vector2i(-1, -1) and GridManager != null:
+			target_cell = cell
+			return GridManager.grid_to_world(cell)
+	
 	if GridManager != null:
 		var store_coords: Array[Vector2i] = []
 		for coord in GridManager.chambers.keys():
