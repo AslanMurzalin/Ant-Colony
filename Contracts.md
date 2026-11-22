@@ -275,6 +275,12 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Signal handler that queues a canvas redraw when a specialized chamber is designated or completed.
 - `_on_draw_overlay() -> void`
   - *Description:* Draw callback for the dedicated dig overlay node, rendering active dig markers and excavation progress bars without redrawing the terrain.
+- `_draw_tunnel_cell(coords: Vector2i, rect: Rect2) -> void`
+  - *Description:* Renders a dark tunnel void (#1a1005) with rounded inner corners (polygon), top/left wall shading for depth, a soil-coloured rim at SOIL-bordered edges, and chamber tint overlay if applicable.
+- `_rounded_rect_polygon(rect: Rect2, r: float, segs: int) -> PackedVector2Array`
+  - *Description:* Returns a polygon that approximates a rectangle with chamfered/rounded corners of radius `r`, each corner arc subdivided into `segs` segments.
+- `_draw_soil_rim(coords: Vector2i, rect: Rect2) -> void`
+  - *Description:* Draws a thin earthy rim line on each edge of the tunnel cell that borders a SOIL neighbour, giving a carved-wall impression rather than a floating void square.
 
 ---
 
