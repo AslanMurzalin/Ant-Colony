@@ -36,8 +36,8 @@ const COLOR_TRUNK_LIGHT: Color = Color(0.451, 0.282, 0.165, 1.0)
 const COLOR_TRUNK_MID: Color = Color(0.345, 0.204, 0.110, 1.0)
 const COLOR_TRUNK_DARK: Color = Color(0.235, 0.133, 0.063, 1.0)
 
-const COLOR_ROOT_MAIN: Color = Color(0.463, 0.290, 0.165, 1.0)     # #764A2A
-const COLOR_ROOT_SHADOW: Color = Color(0.349, 0.204, 0.110, 1.0)   # #59331C
+const COLOR_ROOT_MAIN: Color = Color(0.320, 0.180, 0.080, 1.0)     # #522E14
+const COLOR_ROOT_SHADOW: Color = Color(0.200, 0.100, 0.040, 1.0)   # #331A0A
 
 # Палитра травы и цветов поверхности
 const COLOR_GRASS_DARK: Color = Color(0.243, 0.478, 0.165, 1.0)    # #3E7A2A
@@ -123,7 +123,7 @@ func _spawn_grass_strip() -> void:
 	grass_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	grass_sprite.texture = grass_tex
 	grass_sprite.centered = false
-	# Начало с x = -200, y = surface_y - 36 (где 36 - базовая линия поверхности в текстуре)
+	# Линия основания травы (base_y = 36) ложится ровно на surface_y (256.0)
 	grass_sprite.position = Vector2(-200.0, surface_y - 36.0)
 	grass_sprite.z_index = 1
 	add_child(grass_sprite)
@@ -135,7 +135,7 @@ func _bake_grass_strip() -> ImageTexture:
 	rnd.seed = FIXED_SEED + 9991
 	
 	var gw: int = 2320
-	var gh: int = 50
+	var gh: int = 38 # Высота 38px: base_y = 36, травинки растут вверх, только 2px основание внизу
 	var img: Image = Image.create(gw, gh, false, Image.FORMAT_RGBA8)
 	
 	var base_y: int = 36

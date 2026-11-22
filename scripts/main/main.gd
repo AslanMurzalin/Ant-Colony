@@ -37,49 +37,29 @@ func _ready() -> void:
 	initialize_world()
 
 
-## Шаг 1: Убирает серый фон, ставит тёплую земляную текстуру позади всего.
+## Шаг 1: Убирает серый фон, ставит тёплую многослойную почву позади всего.
 func _fix_earth_background() -> void:
 	var bg: Node = get_node_or_null("Background")
 	if bg == null:
 		return
 
-	# Удаляем старый EarthSoil (может быть ColorRect или TextureRect с неправильным цветом)
 	var old_soil: Node = bg.get_node_or_null("EarthSoil")
+	if old_soil != null and old_soil is SoilBackground:
+		return
+
 	if old_soil != null:
 		old_soil.queue_free()
 
-	# Загружаем тёплую земляную текстуру
-	var tex_path: String = "res://assets/tiles/smooth_earth_bg.png"
-	if not ResourceLoader.exists(tex_path):
-		# Запасной вариант — рисуем ColorRect тёплым коричневым
-		var fallback: ColorRect = ColorRect.new()
-		fallback.name = "EarthSoil"
-		fallback.offset_left   = -400.0
-		fallback.offset_top    = SURFACE_Y
-		fallback.offset_right  = 2400.0
-		fallback.offset_bottom = 1400.0
-		fallback.color = Color(0.65, 0.44, 0.27)   # #A67045 — тёплая земля
-		fallback.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		fallback.z_index = -10
-		bg.add_child(fallback)
-		bg.move_child(fallback, 0)
-		return
-
-	var tex: Texture2D = load(tex_path)
-	var soil_rect: TextureRect = TextureRect.new()
-	soil_rect.name = "EarthSoil"
-	soil_rect.texture = tex
-	soil_rect.stretch_mode = TextureRect.STRETCH_TILE          # тайлинг
-	soil_rect.offset_left   = -400.0
-	soil_rect.offset_top    = SURFACE_Y
-	soil_rect.offset_right  = 2400.0
-	soil_rect.offset_bottom = 1400.0
-	soil_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	soil_rect.z_index = -10
-	bg.add_child(soil_rect)
-	# Перемещаем самым нижним среди дочерних узлов Background,
-	# чтобы небо, холмы и трава были поверх него
-	bg.move_child(soil_rect, 0)
+	var soil_node: SoilBackground = SoilBackground.new()
+	soil_node.name = "EarthSoil"
+	soil_node.offset_left   = -400.0
+	soil_node.offset_top    = SURFACE_Y
+	soil_node.offset_right  = 2400.0
+	soil_node.offset_bottom = 1400.0
+	soil_node.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	soil_node.z_index = -10
+	bg.add_child(soil_node)
+	bg.move_child(soil_node, 0)
 
 
 ## Шаг 2: Делает сетку (GridView / TileMap / TileMapLayer) почти прозрачной.

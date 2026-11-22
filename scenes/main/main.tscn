@@ -21,6 +21,7 @@
 [ext_resource type="Script" path="res://scripts/nature/surface_decor_spawner.gd" id="20_decor"]
 [ext_resource type="Texture2D" path="res://assets/tiles/smooth_earth_bg.png" id="21_earth"]
 [ext_resource type="Script" path="res://scripts/nature/sky_background.gd" id="22_sky"]
+[ext_resource type="Script" path="res://scripts/nature/soil_background.gd" id="23_soil"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -41,8 +42,7 @@ offset_top = 256.0
 offset_right = 2400.0
 offset_bottom = 1400.0
 mouse_filter = 2
-texture = ExtResource("21_earth")
-stretch_mode = 1
+script = ExtResource("23_soil")
 
 [node name="SurfaceDecor" type="Node2D" parent="Background"]
 script = ExtResource("20_decor")

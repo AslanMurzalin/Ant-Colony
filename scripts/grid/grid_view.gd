@@ -16,12 +16,14 @@ var color_royal_chamber: Color = Color("#f2c230")
 var color_nursery:       Color = Color(0.78, 0.45, 0.72)
 var color_food_store:    Color = Color(0.88, 0.62, 0.18)
 
-# Deep dark tunnel void — matches antcolony.gg (#1a1005)
-var color_tunnel_void:   Color = Color(0.102, 0.063, 0.020, 1.0)   # #1a1005
-# Slightly lighter inner wall (top + left edges) for depth illusion
-var color_tunnel_wall:   Color = Color(0.18,  0.11,  0.05,  1.0)   # subtle warm edge
-# Very faint soil rim drawn around tunnel edges into neighbouring SOIL cells
-var color_soil_rim:      Color = Color(0.55,  0.38,  0.20,  0.55)  # earthy inner bevel
+# Deep dark tunnel void — matches antcolony.gg (#4A2E1A body, deeper #22140A center)
+var color_tunnel_body:   Color = Color(0.290, 0.180, 0.102, 1.0)   # #4A2E1A
+var color_tunnel_void:   Color = Color(0.133, 0.078, 0.039, 1.0)   # #22140A core
+# Ambient occlusion shading along carved soil walls
+var color_tunnel_ao:     Color = Color(0.080, 0.040, 0.015, 0.85)  # deep edge shadow
+var color_tunnel_wall:   Color = Color(0.350, 0.220, 0.125, 1.0)   # subtle warm edge
+# Earthy rim drawn around tunnel edges into neighbouring SOIL cells
+var color_soil_rim:      Color = Color(0.480, 0.320, 0.170, 0.65)  # earthy bevel
 
 # ── Corner rounding ─────────────────────────────────────────────────────────────
 # Radius in pixels to cut off each inner corner of a tunnel cell
@@ -109,42 +111,89 @@ func _draw() -> void:
 # ── Tunnel cell renderer ───────────────────────────────────────────────────────
 # Draws a dark tunnel void with:
 #   • Rounded inner corners (polygon that cuts off the 4 corners)
-#   • Subtle shading on top/left walls to give depth
-#   • A thin soil-coloured rim at borders shared with SOIL neighbours
+#   • Depth-based ambient darkening (deeper cells are darker)
+#   • Warm #4A2E1A body with deeper #22140A hollow core
+#   • Soft ambient occlusion shadow along edges bordering SOIL
+#   • A thin earthy rim at borders shared with SOIL neighbours
 func _draw_tunnel_cell(coords: Vector2i, rect: Rect2) -> void:
-	# 1. Base dark fill with rounded corners ───────────────────────────────────
+	# Коэффициент глубины: глубже под землей туннели темнее
+	var s_row: int = GridManager.surface_row
+	var max_row: int = GridManager.grid_height
+	var depth_t: float = float(coords.y - s_row) / float(maxi(1, max_row - s_row))
+	var depth_darken: float = 1.0 - depth_t * 0.25
+
+	# 1. Base dark fill with rounded corners (#4A2E1A darkened by depth) ───────
 	var poly: PackedVector2Array = _rounded_rect_polygon(rect, CORNER_R, CORNER_SEGS)
-	draw_colored_polygon(poly, color_tunnel_void)
+	var body_col: Color = Color(
+		color_tunnel_body.r * depth_darken,
+		color_tunnel_body.g * depth_darken,
+		color_tunnel_body.b * depth_darken,
+		1.0
+	)
+	draw_colored_polygon(poly, body_col)
 
-	# 2. Inner wall shading (top + left = slightly lighter warm brown → depth) ─
-	var top_left:     Vector2 = rect.position
-	var top_right:    Vector2 = rect.position + Vector2(rect.size.x, 0.0)
-	var bottom_left:  Vector2 = rect.position + Vector2(0.0, rect.size.y)
-	var bottom_right: Vector2 = rect.end
+	# 2. Deeper hollow core in the center of the cell ──────────────────────────
+	var core_rect: Rect2 = rect.grow(-4.0)
+	var core_col: Color = Color(
+		color_tunnel_void.r * depth_darken,
+		color_tunnel_void.g * depth_darken,
+		color_tunnel_void.b * depth_darken,
+		0.85
+	)
+	draw_rect(core_rect, core_col)
 
-	# Thin top wall shading
-	draw_line(top_left  + Vector2(2.0, 1.5), top_right  + Vector2(-2.0, 1.5), color_tunnel_wall, 2.0)
-	# Thin left wall shading
-	draw_line(top_left  + Vector2(1.5, 2.0), bottom_left + Vector2(1.5, -2.0), color_tunnel_wall, 2.0)
-	# Thin bottom shadow (darker, casts depth)
-	draw_line(bottom_left + Vector2(2.0, -1.5), bottom_right + Vector2(-2.0, -1.5),
-			Color(0.05, 0.03, 0.01, 0.9), 1.5)
+	# 3. Ambient occlusion along carved soil borders ───────────────────────────
+	_draw_tunnel_ambient_occlusion(coords, rect)
 
-	# 3. Soil rim at borders shared with SOIL neighbours ──────────────────────
+	# 4. Earthy rim at borders shared with SOIL neighbours ────────────────────
 	_draw_soil_rim(coords, rect)
 
-	# 4. Chamber tint overlay ─────────────────────────────────────────────────
+	# 5. Chamber tint overlay ─────────────────────────────────────────────────
 	var chamber: Enums.ChamberType = GridManager.get_chamber_type(coords)
 	match chamber:
 		Enums.ChamberType.ROYAL:
-			draw_colored_polygon(poly, Color(0.85, 0.65, 0.25, 0.30))
+			draw_colored_polygon(poly, Color(0.85, 0.65, 0.25, 0.35))
 			draw_rect(rect, color_royal_chamber, false, 1.0)
 		Enums.ChamberType.NURSERY:
-			draw_colored_polygon(poly, Color(0.78, 0.45, 0.72, 0.30))
+			draw_colored_polygon(poly, Color(0.78, 0.45, 0.72, 0.35))
 			draw_rect(rect, color_nursery, false, 1.0)
 		Enums.ChamberType.FOOD_STORE:
-			draw_colored_polygon(poly, Color(0.88, 0.62, 0.18, 0.30))
+			draw_colored_polygon(poly, Color(0.88, 0.62, 0.18, 0.35))
 			draw_rect(rect, color_food_store, false, 1.0)
+
+
+## Отрисовка мягкого затенения (ambient occlusion) вдоль стен, граничащих с землей
+func _draw_tunnel_ambient_occlusion(coords: Vector2i, rect: Rect2) -> void:
+	var gw: int = GridManager.grid_width
+	var gh: int = GridManager.grid_height
+
+	# Верхняя граница с землей (глубокая тень сверху)
+	var up: Vector2i = coords + Vector2i(0, -1)
+	if up.y >= 0 and GridManager.get_cell_type(up) == Enums.CellType.SOIL:
+		draw_line(rect.position + Vector2(2.0, 2.0),
+				  rect.position + Vector2(rect.size.x - 2.0, 2.0),
+				  color_tunnel_ao, 3.0)
+
+	# Левая граница с землей (тень слева)
+	var lt: Vector2i = coords + Vector2i(-1, 0)
+	if lt.x >= 0 and GridManager.get_cell_type(lt) == Enums.CellType.SOIL:
+		draw_line(rect.position + Vector2(2.0, 2.0),
+				  rect.position + Vector2(2.0, rect.size.y - 2.0),
+				  color_tunnel_ao, 3.0)
+
+	# Нижняя граница с землей (мягкая тень снизу)
+	var dn: Vector2i = coords + Vector2i(0, 1)
+	if dn.y < gh and GridManager.get_cell_type(dn) == Enums.CellType.SOIL:
+		draw_line(rect.position + Vector2(2.0, rect.size.y - 2.0),
+				  rect.position + Vector2(rect.size.x - 2.0, rect.size.y - 2.0),
+				  color_tunnel_ao, 2.0)
+
+	# Правая граница с землей (мягкая тень справа)
+	var rt: Vector2i = coords + Vector2i(1, 0)
+	if rt.x < gw and GridManager.get_cell_type(rt) == Enums.CellType.SOIL:
+		draw_line(rect.position + Vector2(rect.size.x - 2.0, 2.0),
+				  rect.position + Vector2(rect.size.x - 2.0, rect.size.y - 2.0),
+				  color_tunnel_ao, 2.0)
 
 
 # Returns a polygon for a rectangle with the 4 corners chamfered by radius r.

@@ -21,13 +21,13 @@ func _process(delta: float) -> void:
 			_spawn_periodic_food()
 
 func spawn_initial_food() -> void:
-	# Spawn close crumb nodes near entrance (X: 880, 1040, Y: 228)
-	spawn_food_node(Vector2(880.0, 228.0), 6, "Bread Crumb")
-	spawn_food_node(Vector2(1040.0, 228.0), 6, "Seed Cluster")
+	# Spawn close crumb nodes near entrance (X: 880, 1040, Y: 248)
+	spawn_food_node(Vector2(880.0, 248.0), 6, "Bread Crumb")
+	spawn_food_node(Vector2(1040.0, 248.0), 6, "Seed Cluster")
 	
 	# Spawn far rich nodes (Fruit / Dead Insect)
-	spawn_food_node(Vector2(450.0, 228.0), 20, "Fallen Strawberry")
-	spawn_food_node(Vector2(1480.0, 228.0), 25, "Dead Beetle Carcass")
+	spawn_food_node(Vector2(450.0, 248.0), 20, "Fallen Strawberry")
+	spawn_food_node(Vector2(1480.0, 248.0), 25, "Dead Beetle Carcass")
 
 func spawn_food_node(pos: Vector2, amount: int, s_name: String) -> FoodSource:
 	if food_source_scene == null:
@@ -62,7 +62,7 @@ func _spawn_periodic_food() -> void:
 			amount = randi_range(4, 8)
 			name_str = "Bread Crumb"
 		
-		spawn_food_node(Vector2(spawn_x, 228.0), amount, name_str)
+		spawn_food_node(Vector2(spawn_x, 248.0), amount, name_str)
 
 func get_closest_food(from_pos: Vector2) -> FoodSource:
 	var best_source: FoodSource = null

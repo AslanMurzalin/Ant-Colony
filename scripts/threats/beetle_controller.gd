@@ -17,7 +17,7 @@ var current_target: Node2D = null
 var repath_timer: float = 0.0
 
 const ENTRANCE_X: float = 976.0
-const SURFACE_Y: float = 228.0
+const SURFACE_Y: float = 248.0
 const UNDERGROUND_Y: float = 256.0
 
 @onready var sprite: Sprite2D = $Sprite2D

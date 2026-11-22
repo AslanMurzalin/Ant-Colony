@@ -281,6 +281,8 @@ Visual 2D renderer for subterranean cells, rocks, excavated tunnels, royal chamb
   - *Description:* Returns a polygon that approximates a rectangle with chamfered/rounded corners of radius `r`, each corner arc subdivided into `segs` segments.
 - `_draw_soil_rim(coords: Vector2i, rect: Rect2) -> void`
   - *Description:* Draws a thin earthy rim line on each edge of the tunnel cell that borders a SOIL neighbour, giving a carved-wall impression rather than a floating void square.
+- `_draw_tunnel_ambient_occlusion(coords: Vector2i, rect: Rect2) -> void`
+  - *Description:* Renders soft ambient occlusion shadows along walls of tunnel cells bordering undisturbed soil.
 
 ---
 
@@ -650,6 +652,18 @@ Procedural decorator generating two layers of trees with pointillist stippled ca
     - *Description:* Procedurally generates a continuous dithered grass strip across map width with jagged blades, wildflowers on thin stems, small pebbles, and bushes near tree bases, kept low at anthill entrance, baked into ImageTexture.
   - `_spawn_prop(texture_path: String, pos_x: float, pos_y: float, min_scale: float, max_scale: float) -> void`
     - *Description:* Instantiates a Sprite2D prop with bottom-center pivot offset, randomized scale, and jittered position.
+
+### 4.2.3 `SoilBackground` (`res://scripts/nature/soil_background.gd`)
+Procedural multi-layer sandy subsoil generator in antcolony.gg style with wavy dithered transitions, depth darkening, and embedded grey stones and blue minerals.
+- **Properties:**
+  - `const FIXED_SEED: int = 421337`
+  - `const TEX_WIDTH: int = 700`
+  - `const TEX_HEIGHT: int = 286`
+- **Methods:**
+  - `generate_soil() -> void`
+    - *Description:* Generates a 2-layer sand-beige soil texture with dithered wavy layer boundaries, sand grain noise, and depth gradient, baked into ImageTexture with NEAREST filter.
+  - `_draw_mineral_deposits(img: Image, rnd: RandomNumberGenerator) -> void`
+    - *Description:* Renders irregular soft-edged grey stone deposits (#8A8A8A) and blue crystal mineral veins (#5F7FA8) distributed across subterranean depths.
 
 ### 4.3 `DaySummaryController` (`res://scripts/ui/day_summary_controller.gd`)
 - **Methods:**

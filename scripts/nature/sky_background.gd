@@ -126,17 +126,10 @@ func _render_hills(img: Image) -> void:
 			var col: Color = Color(HILL_MID.r + dither, HILL_MID.g + dither, HILL_MID.b + dither, 1.0)
 			img.set_pixel(x, y, col)
 	
-	# Слой 3: Ближний холм
+	# Слой 3: Ближний холм (спускается к линии горизонта y=164)
 	for x in range(TEX_WIDTH):
 		var h3: int = 148 + int(sin(float(x) * 0.017 + 4.2) * 7.0 + sin(float(x) * 0.035) * 4.0)
 		for y in range(h3, TEX_HEIGHT):
 			var dither: float = float((x + y * 2) % 3) * 0.01
 			var col: Color = Color(HILL_NEAR.r + dither, HILL_NEAR.g + dither, HILL_NEAR.b + dither, 1.0)
 			img.set_pixel(x, y, col)
-	
-	# Полоса травы у горизонта (плавный переход к поверхности земли y=158..164)
-	for x in range(TEX_WIDTH):
-		for y in range(158, TEX_HEIGHT):
-			var blend: float = float(y - 158) / 6.0
-			var curr: Color = img.get_pixel(x, y)
-			img.set_pixel(x, y, curr.lerp(GRASS_BASE, blend * 0.8))
