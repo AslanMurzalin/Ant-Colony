@@ -695,6 +695,12 @@ Root orchestrator in `res://scenes/main/main.tscn`.
   - *Description:* Spawns starter worker ants in the royal chamber and apportions initial tasks via `TaskAllocationManager`.
 - `toggle_fullscreen() -> void`
   - *Description:* Toggles between fullscreen and windowed modes via `DisplayServer`. Bound to `F11` and `Alt+Enter`.
+- `_fix_earth_background() -> void`
+  - *Description:* Removes old EarthSoil node and replaces it with a TextureRect using `smooth_earth_bg.png` (STRETCH_TILE, z_index=-10). Falls back to a warm ColorRect if the texture is missing.
+- `_fix_grid_opacity() -> void`
+  - *Description:* Finds GridView, TileMap, or TileMapLayer nodes and sets their `modulate.a = 0.05` so the grid is nearly invisible over the earth background.
+- `_fix_tree_root_joints() -> void`
+  - *Description:* Iterates all tree nodes inside Background/SurfaceDecor and snaps their position.y to SURFACE_Y, then resets all child visual nodes to Vector2.ZERO to guarantee trunk/root joints are seamless.
 
 ---
 
