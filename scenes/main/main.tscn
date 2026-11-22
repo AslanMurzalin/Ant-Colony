@@ -61,12 +61,14 @@ selection_popup = NodePath("../UILayer/SelectionPopup")
 script = ExtResource("7_weather")
 
 [node name="FoodSpawner" type="Node2D" parent="."]
+z_index = 4
 script = ExtResource("6_spawner")
 
 [node name="Queen" parent="." instance=ExtResource("5_queen")]
 position = Vector2(976, 528)
 
 [node name="Ants" type="Node2D" parent="."]
+z_index = 4
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(960, 540)

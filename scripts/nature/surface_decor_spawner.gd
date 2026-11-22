@@ -1,12 +1,13 @@
 class_name SurfaceDecorSpawner
 extends Node2D
 
-## Спавнер декораций поверхности (Этап 2: Деревья, кроны и корни).
+## Спавнер декораций поверхности (Этап 3: Трава, цветы, мелкие детали поверхности).
 ## Создает визуальный стиль как на референсе браузерной игры Ant Colony (antcolony.gg):
 ##   - 2 слоя деревьев: дальний (меньше, темнее) и ближний (крупнее, сочнее).
 ##   - Кроны: пуантилизм/мозаика из тысяч мелких разноцветных точек (зеленый, розовый, белый, красный).
 ##   - Стволы: фактурные коричневые со светотенью и легким расширением у корней.
 ##   - Корни: рекурсивное ветвление, извилистые, сужающиеся, без прямых линий.
+##   - Трава: зубчатый край, пучки разной высоты, желтые/розовые/красные цветы на стебельках, камешки и кустики.
 ##   - Запекание в ImageTexture один раз при старте (60 FPS, 0 draw calls в кадрах).
 
 @export var surface_y: float = 256.0           ## Высота поверхности земли (Y = row 8 * 32)
@@ -38,24 +39,26 @@ const COLOR_TRUNK_DARK: Color = Color(0.235, 0.133, 0.063, 1.0)
 const COLOR_ROOT_MAIN: Color = Color(0.463, 0.290, 0.165, 1.0)     # #764A2A
 const COLOR_ROOT_SHADOW: Color = Color(0.349, 0.204, 0.110, 1.0)   # #59331C
 
-# Текстуры для цветов и мелких деталей поверхности
-const TEXTURES_SMALL: Array[String] = [
-	"res://assets/nature/flower_white.png",
-	"res://assets/nature/flower_yellow.png",
-	"res://assets/nature/flower_pink.png",
-	"res://assets/nature/clover.png",
-	"res://assets/nature/stone_small.png",
-	"res://assets/nature/stone_pebble.png",
-	"res://assets/nature/grass_bush.png",
-]
+# Палитра травы и цветов поверхности
+const COLOR_GRASS_DARK: Color = Color(0.243, 0.478, 0.165, 1.0)    # #3E7A2A
+const COLOR_GRASS_MID: Color = Color(0.353, 0.604, 0.235, 1.0)     # #5A9A3C
+const COLOR_GRASS_LIGHT: Color = Color(0.447, 0.702, 0.314, 1.0)   # #72B350
+const COLOR_GRASS_BRIGHT: Color = Color(0.553, 0.816, 0.400, 1.0)  # #8DD066
+const COLOR_STEM: Color = Color(0.275, 0.529, 0.176, 1.0)
+
+const COLOR_FLOWER_YELLOW: Color = Color(0.949, 0.761, 0.114, 1.0) # #F2C21D
+const COLOR_STONE_LIGHT: Color = Color(0.541, 0.541, 0.541, 1.0)   # #8A8A8A
+const COLOR_STONE_DARK: Color = Color(0.373, 0.373, 0.373, 1.0)    # #5F5F5F
+const COLOR_BUSH_DARK: Color = Color(0.184, 0.353, 0.125, 1.0)
+const COLOR_BUSH_LIGHT: Color = Color(0.255, 0.471, 0.176, 1.0)
 
 
 func _ready() -> void:
-	z_index = 1
+	z_index = 0
 	generate_surface_decorations()
 
 
-## Генерация всех деревьев двух слоев и поверхностных декораций
+## Генерация всех деревьев двух слоев, полосы травы и цветов
 func generate_surface_decorations() -> void:
 	for child in get_children():
 		child.queue_free()
@@ -80,13 +83,8 @@ func generate_surface_decorations() -> void:
 			_spawn_tree_with_roots(fx, surface_y, false, 1.08, front_seed_idx)
 			front_seed_idx += 43
 
-	# 3. Мелкие полевые цветы и трава вдоль линии горизонта
-	var current_x: float = randf_range(15.0, 40.0)
-	while current_x < map_width - 20.0:
-		if absf(current_x - entrance_x) > 25.0:
-			var tex_path: String = TEXTURES_SMALL.pick_random()
-			_spawn_prop(tex_path, current_x, surface_y, 0.65, 0.95)
-		current_x += randf_range(30.0, 65.0)
+	# 3. Полоса травы с полевыми цветами, кустами и камешками (Этап 3)
+	_spawn_grass_strip()
 
 
 ## Создание одного дерева (крона + ствол + корни)
@@ -111,12 +109,134 @@ func _spawn_tree_with_roots(pos_x: float, pos_y: float, is_background: bool = fa
 	canopy_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	canopy_sprite.texture = canopy_tex
 	canopy_sprite.centered = true
-	# Нижняя точка ствола лежит ровно на Y=0 (уровне земли)
 	canopy_sprite.offset = Vector2(0.0, -float(canopy_tex.get_height()) * 0.5)
 	canopy_sprite.z_index = 0 if is_background else 2
 	tree_node.add_child(canopy_sprite)
 
 	add_child(tree_node)
+
+
+## Создание запеченной полосы травы с цветами вдоль всей поверхности карты
+func _spawn_grass_strip() -> void:
+	var grass_tex: ImageTexture = _bake_grass_strip()
+	var grass_sprite: Sprite2D = Sprite2D.new()
+	grass_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	grass_sprite.texture = grass_tex
+	grass_sprite.centered = false
+	# Начало с x = -200, y = surface_y - 36 (где 36 - базовая линия поверхности в текстуре)
+	grass_sprite.position = Vector2(-200.0, surface_y - 36.0)
+	grass_sprite.z_index = 1
+	add_child(grass_sprite)
+
+
+## Запекание полосы травы, цветов, кустов и камешков в единый ImageTexture
+func _bake_grass_strip() -> ImageTexture:
+	var rnd: RandomNumberGenerator = RandomNumberGenerator.new()
+	rnd.seed = FIXED_SEED + 9991
+	
+	var gw: int = 2320
+	var gh: int = 50
+	var img: Image = Image.create(gw, gh, false, Image.FORMAT_RGBA8)
+	
+	var base_y: int = 36
+	var ent_x: int = int(entrance_x) + 200 # смещение за счет x = -200
+	
+	# 1. Трава с зубчатым краем и пучками травинок
+	for x in range(gw):
+		var dist_to_ent: int = absi(x - ent_x)
+		var is_ent: bool = dist_to_ent < 80
+		var blade_h: int
+		if is_ent:
+			blade_h = rnd.randi_range(1, 3) # низкий аккуратный срез у входа
+		else:
+			var wave: float = sin(float(x) * 0.08) * 3.0 + sin(float(x) * 0.02) * 4.0
+			blade_h = clampi(int(7.0 + wave) + rnd.randi_range(-3, 3), 4, 15)
+		
+		var top_y: int = base_y - blade_h
+		for y in range(top_y, gh):
+			var roll: float = rnd.randf()
+			var rel: float = float(y - top_y) / float(gh - top_y)
+			var col: Color
+			if rel < 0.25:
+				col = COLOR_GRASS_BRIGHT if roll < 0.3 else COLOR_GRASS_LIGHT
+			elif rel < 0.6:
+				col = COLOR_GRASS_LIGHT if roll < 0.4 else COLOR_GRASS_MID
+			else:
+				col = COLOR_GRASS_MID if roll < 0.3 else COLOR_GRASS_DARK
+			img.set_pixel(x, y, col)
+	
+	# 2. Мелкие серые камешки
+	var num_stones: int = 28
+	for _s in range(num_stones):
+		var sx: int = rnd.randi_range(20, gw - 20)
+		if absi(sx - ent_x) < 70:
+			continue
+		var sw: int = rnd.randi_range(3, 6)
+		var sh: int = rnd.randi_range(2, 4)
+		var sy: int = base_y - rnd.randi_range(0, 2)
+		for dx in range(sw):
+			for dy in range(sh):
+				if (dx == 0 and dy == 0) or (dx == sw - 1 and dy == 0):
+					continue
+				var px: int = sx + dx
+				var py: int = sy + dy
+				if px >= 0 and px < gw and py >= 0 and py < gh:
+					var scol: Color = COLOR_STONE_LIGHT if dy == 0 else COLOR_STONE_DARK
+					img.set_pixel(px, py, scol)
+	
+	# 3. 5 невысоких кустиков тёмно-зелёного цвета у оснований деревьев
+	var bush_xs: Array[int] = [
+		110 + 200 + 20, 480 + 200 - 22, 870 + 200 - 26, 1290 + 200 + 24, 1690 + 200 - 18
+	]
+	for bx in bush_xs:
+		var bw: int = rnd.randi_range(16, 24)
+		var bh: int = rnd.randi_range(9, 14)
+		for dy in range(-bh, 2):
+			for dx in range(-bw / 2, bw / 2 + 1):
+				var nx: float = float(dx) / (float(bw) * 0.5)
+				var ny: float = float(dy) / float(bh)
+				if nx * nx + ny * ny <= 1.0:
+					var px: int = bx + dx
+					var py: int = base_y + dy
+					if px >= 0 and px < gw and py >= 0 and py < gh:
+						var bcol: Color = COLOR_BUSH_LIGHT if (rnd.randf() < 0.35 and dy < -int(float(bh) * 0.3)) else COLOR_BUSH_DARK
+						img.set_pixel(px, py, bcol)
+	
+	# 4. Тонкие стебельки с разноцветными цветами
+	var num_flowers: int = 70
+	for _f in range(num_flowers):
+		var fx: int = rnd.randi_range(15, gw - 15)
+		if absi(fx - ent_x) < 85:
+			continue
+		var stem_h: int = rnd.randi_range(12, 26)
+		var flower_y: int = base_y - stem_h
+		var lean: int = [-1, 0, 1].pick_random()
+		
+		# Стебелек в 1px
+		for sy in range(flower_y + 3, base_y):
+			var prog: float = float(sy - flower_y) / float(stem_h)
+			var cur_fx: int = fx + int(float(lean) * (1.0 - prog) * 3.0)
+			if cur_fx >= 0 and cur_fx < gw and sy >= 0 and sy < gh:
+				img.set_pixel(cur_fx, sy, COLOR_STEM)
+		
+		# Цветок (размер 3-5px)
+		var f_roll: float = rnd.randf()
+		var f_col: Color = COLOR_FLOWER_YELLOW if f_roll < 0.45 else (COLOR_FLOWER_PINK if f_roll < 0.8 else COLOR_FRUIT_RED)
+		var f_center: Color = Color(1.0, 1.0, 0.85, 1.0) if f_col != COLOR_FLOWER_YELLOW else Color.WHITE
+		var f_size: int = [3, 4, 5].pick_random()
+		var top_fx: int = fx + lean * 3
+		var half_s: int = f_size / 2
+		
+		for fdy in range(-half_s, half_s + 1):
+			for fdx in range(-half_s, half_s + 1):
+				if absi(fdx) + absi(fdy) <= half_s + 1:
+					var px: int = top_fx + fdx
+					var py: int = flower_y + fdy
+					if px >= 0 and px < gw and py >= 0 and py < gh:
+						var c: Color = f_center if (fdx == 0 and fdy == 0) else f_col
+						img.set_pixel(px, py, c)
+	
+	return ImageTexture.create_from_image(img)
 
 
 ## Запекание кроны и ствола дерева в ImageTexture
@@ -213,10 +333,10 @@ func _bake_roots(tree_seed: int) -> ImageTexture:
 	var start_y: int = 2
 	
 	# 4 основных извилистых корня, расходящихся веером
-	_grow_root_branch(img, rnd, start_x, start_y, -0.65, 85.0, 8.5, 0) # влево
-	_grow_root_branch(img, rnd, start_x, start_y, -0.22, 115.0, 9.5, 0) # вниз-влево
-	_grow_root_branch(img, rnd, start_x, start_y, 0.20, 110.0, 9.5, 0)  # вниз-вправо
-	_grow_root_branch(img, rnd, start_x, start_y, 0.62, 80.0, 8.0, 0)  # вправо
+	_grow_root_branch(img, rnd, start_x, start_y, -0.65, 85.0, 8.5, 0)
+	_grow_root_branch(img, rnd, start_x, start_y, -0.22, 115.0, 9.5, 0)
+	_grow_root_branch(img, rnd, start_x, start_y, 0.20, 110.0, 9.5, 0)
+	_grow_root_branch(img, rnd, start_x, start_y, 0.62, 80.0, 8.0, 0)
 	
 	return ImageTexture.create_from_image(img)
 
@@ -234,15 +354,12 @@ func _grow_root_branch(img: Image, rnd: RandomNumberGenerator, x: float, y: floa
 	var rh: int = img.get_height()
 	
 	for s in range(steps):
-		# Извилистость и случайный поворот (не прямые линии!)
 		cur_angle += rnd.randf_range(-0.16, 0.16)
-		# Сужение толщины
 		var cur_thick: float = maxf(1.0, thickness * (1.0 - (float(s) / float(steps)) * 0.45))
 		
 		var nx: float = cur_x + sin(cur_angle) * 2.0
 		var ny: float = cur_y + cos(cur_angle) * 2.0
 		
-		# Отрисовка утолщенного сегмента
 		var rad: int = int(cur_thick * 0.5)
 		for dx in range(-rad, rad + 1):
 			for dy in range(-rad, rad + 1):
@@ -256,13 +373,11 @@ func _grow_root_branch(img: Image, rnd: RandomNumberGenerator, x: float, y: floa
 		cur_x = nx
 		cur_y = ny
 		
-		# Ветвление в процессе роста
 		if s > 3 and rnd.randf() < 0.11 and depth < 3:
 			var branch_dir: float = -1.0 if rnd.randf() < 0.5 else 1.0
 			var b_angle: float = cur_angle + branch_dir * rnd.randf_range(0.35, 0.70)
 			_grow_root_branch(img, rnd, cur_x, cur_y, b_angle, length * rnd.randf_range(0.5, 0.75), cur_thick * 0.65, depth + 1)
 	
-	# Развилка на конце ветви
 	if depth < 2:
 		_grow_root_branch(img, rnd, cur_x, cur_y, cur_angle - rnd.randf_range(0.2, 0.4), length * 0.6, thickness * 0.6, depth + 1)
 		_grow_root_branch(img, rnd, cur_x, cur_y, cur_angle + rnd.randf_range(0.2, 0.4), length * 0.6, thickness * 0.6, depth + 1)

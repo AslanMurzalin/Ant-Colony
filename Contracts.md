@@ -644,6 +644,10 @@ Procedural decorator generating two layers of trees with pointillist stippled ca
     - *Description:* Generates deep winding subterranean roots spreading out from the trunk base, baked into an ImageTexture.
   - `_grow_root_branch(img: Image, rnd: RandomNumberGenerator, x: float, y: float, angle_rad: float, length: float, thickness: float, depth: int) -> void`
     - *Description:* Recursively grows a winding gnarly root branch with thickness tapering, directional wander, and branching sub-roots.
+  - `_spawn_grass_strip() -> void`
+    - *Description:* Instantiates a Sprite2D using the baked continuous grass strip texture and positions it at the surface horizon (z_index=1, behind food and ants).
+  - `_bake_grass_strip() -> ImageTexture`
+    - *Description:* Procedurally generates a continuous dithered grass strip across map width with jagged blades, wildflowers on thin stems, small pebbles, and bushes near tree bases, kept low at anthill entrance, baked into ImageTexture.
   - `_spawn_prop(texture_path: String, pos_x: float, pos_y: float, min_scale: float, max_scale: float) -> void`
     - *Description:* Instantiates a Sprite2D prop with bottom-center pivot offset, randomized scale, and jittered position.
 
