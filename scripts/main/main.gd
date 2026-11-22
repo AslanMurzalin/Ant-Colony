@@ -46,7 +46,6 @@ func spawn_starter_ants(count: int) -> void:
 		ant.ant_id = GameManager.get_next_ant_id()
 		ant.position = spawn_center + Vector2((float(i) - 2.0) * 16.0, 10.0)
 		ants_container.add_child(ant)
-		var job: Enums.JobType = TaskAllocationManager.request_job_for_ant(ant)
-		ant.assign_job(job)
+		ant.assign_job(Enums.JobType.DEFEND)
 	
 	GameManager.total_workers_alive = count

@@ -45,28 +45,33 @@ theme_override_constants/v_separation = 4
 [node name="BtnForage" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+custom_minimum_size = Vector2(85, 30)
 text = "🌾 Forage"
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 
 [node name="BtnDig" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+custom_minimum_size = Vector2(85, 30)
 text = "⛏ Dig"
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 
 [node name="BtnNurse" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+custom_minimum_size = Vector2(85, 30)
 text = "🍼 Nurse"
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 
 [node name="BtnDefend" type="Button" parent="MarginContainer/VBoxContainer/RolesGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+custom_minimum_size = Vector2(85, 30)
 text = "⚔ Defend"
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 12
 
 [node name="BtnUnpin" type="Button" parent="MarginContainer/VBoxContainer"]
+visible = false
 layout_mode = 2
 text = "🔓 Unpin (Auto)"
 theme_override_font_sizes/font_size = 11

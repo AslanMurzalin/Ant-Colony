@@ -17,6 +17,7 @@ signal popup_closed()
 @onready var _btn_unpin: Button = $MarginContainer/VBoxContainer/BtnUnpin
 
 func _ready() -> void:
+	add_to_group("selection_popup")
 	hide()
 	if _close_btn != null:
 		_close_btn.pressed.connect(_on_close_pressed)

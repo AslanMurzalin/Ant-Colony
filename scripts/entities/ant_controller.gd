@@ -7,7 +7,7 @@ signal ant_died(ant: AntController)
 signal ant_state_changed(old_state: Enums.AntState, new_state: Enums.AntState)
 signal job_switched(old_job: Enums.JobType, new_job: Enums.JobType)
 
-@export var current_job: Enums.JobType = Enums.JobType.IDLE
+@export var current_job: Enums.JobType = Enums.JobType.DEFEND
 @export var state: Enums.AntState = Enums.AntState.IDLE
 @export var health: float = 20.0
 @export var move_speed: float = 45.0
@@ -108,13 +108,9 @@ func set_selected(selected: bool) -> void:
 		queue_redraw()
 
 func request_job_transition() -> void:
-	if is_manually_pinned:
-		return
-	if state != Enums.AntState.IDLE:
-		return
-	var desired_job: Enums.JobType = TaskAllocationManager.request_job_for_ant(self)
-	if desired_job != current_job:
-		assign_job(desired_job)
+	# Roles are assigned explicitly by the player.
+	# Automatic background role swapping is disabled.
+	return
 
 func set_ant_state(new_state: Enums.AntState) -> void:
 	if new_state == state:
@@ -551,7 +547,7 @@ func update_job_visuals() -> void:
 	var tex_path: String = "res://assets/sprites_topdown/worker_forager.png"
 	match current_job:
 		Enums.JobType.FORAGE:
-			badge_color = Color(0.55, 0.35, 0.17, 1.0) # Brown
+			badge_color = Color(0.2, 0.55, 0.95, 1.0) # Blue
 			tex_path = "res://assets/sprites_topdown/worker_forager.png"
 		Enums.JobType.DIG:
 			badge_color = Color(0.9, 0.5, 0.13, 1.0) # Orange

@@ -16,6 +16,10 @@ var selected_ants: Array[AntController] = []
 
 func _ready() -> void:
 	z_index = 50
+	if selection_popup == null:
+		selection_popup = get_node_or_null("../UILayer/SelectionPopup") as SelectionPopup
+	if selection_popup == null:
+		selection_popup = get_tree().get_first_node_in_group("selection_popup") as SelectionPopup
 	if selection_popup != null:
 		selection_popup.role_chosen.connect(_on_role_chosen)
 		selection_popup.unpin_chosen.connect(_on_unpin_chosen)
@@ -26,20 +30,19 @@ func _input(event: InputEvent) -> void:
 		var mouse_event: InputEventMouseButton = event as InputEventMouseButton
 		var is_shift: bool = mouse_event.shift_pressed or Input.is_key_pressed(KEY_SHIFT)
 
-		if mouse_event.button_index == MOUSE_BUTTON_RIGHT and is_shift:
-			if mouse_event.pressed:
+		if mouse_event.button_index == MOUSE_BUTTON_RIGHT:
+			if mouse_event.pressed and is_shift:
 				is_box_selecting = true
 				selection_start_world = get_global_mouse_position()
 				selection_curr_world = selection_start_world
 				queue_redraw()
 				get_viewport().set_input_as_handled()
-			else:
-				if is_box_selecting:
-					is_box_selecting = false
-					selection_curr_world = get_global_mouse_position()
-					queue_redraw()
-					_finish_selection()
-					get_viewport().set_input_as_handled()
+			elif not mouse_event.pressed and is_box_selecting:
+				is_box_selecting = false
+				selection_curr_world = get_global_mouse_position()
+				queue_redraw()
+				_finish_selection()
+				get_viewport().set_input_as_handled()
 
 		elif mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed:
 			# If user clicks LMB somewhere while popup is open, close popup if not clicking inside it
@@ -93,12 +96,12 @@ func _finish_selection() -> void:
 	for node in workers:
 		if is_instance_valid(node) and node is AntController:
 			var ant: AntController = node as AntController
-			# If dragged box is small (< 8px), do point/radius check near click
-			if size.x < 8.0 and size.y < 8.0:
-				if ant.global_position.distance_to(selection_curr_world) <= 24.0:
+			# If dragged box is small, do radius check near click
+			if size.x < 16.0 and size.y < 16.0:
+				if ant.global_position.distance_to(selection_curr_world) <= 32.0 or ant.global_position.distance_to(selection_start_world) <= 32.0:
 					selected_ants.append(ant)
 			else:
-				if select_rect.has_point(ant.global_position):
+				if select_rect.grow(4.0).has_point(ant.global_position):
 					selected_ants.append(ant)
 
 	for ant in selected_ants:
@@ -106,6 +109,10 @@ func _finish_selection() -> void:
 
 	if not selected_ants.is_empty():
 		ants_selected.emit(selected_ants)
+		if selection_popup == null:
+			selection_popup = get_node_or_null("../UILayer/SelectionPopup") as SelectionPopup
+		if selection_popup == null:
+			selection_popup = get_tree().get_first_node_in_group("selection_popup") as SelectionPopup
 		if selection_popup != null:
 			var screen_pos: Vector2 = get_viewport().get_mouse_position()
 			selection_popup.open_at(screen_pos, selected_ants.size())

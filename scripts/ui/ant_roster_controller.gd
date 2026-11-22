@@ -15,7 +15,7 @@ var _refresh_timer: float = 0.0
 const REFRESH_INTERVAL: float = 0.3
 
 const JOB_COLORS: Dictionary = {
-	Enums.JobType.FORAGE: Color(0.72, 0.45, 0.20),
+	Enums.JobType.FORAGE: Color(0.25, 0.65, 1.0), # Blue
 	Enums.JobType.DIG:    Color(0.95, 0.60, 0.15),
 	Enums.JobType.NURSE:  Color(0.25, 0.85, 0.40),
 	Enums.JobType.DEFEND: Color(0.90, 0.25, 0.25),
@@ -35,10 +35,7 @@ func _ready() -> void:
 	if _close_btn != null:
 		_close_btn.pressed.connect(close_roster)
 	if _unpin_all_btn != null:
-		_unpin_all_btn.pressed.connect(func() -> void:
-			TaskAllocationManager.unpin_all_ants()
-			refresh_roster()
-		)
+		_unpin_all_btn.visible = false
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
@@ -90,20 +87,16 @@ func refresh_roster() -> void:
 		Enums.JobType.DEFEND: 0,
 		Enums.JobType.IDLE: 0
 	}
-	var pinned_count: int = 0
 	for w in workers:
 		var j: Enums.JobType = w.current_job
 		counts[j] = counts.get(j, 0) + 1
-		if w.is_manually_pinned:
-			pinned_count += 1
 
 	if _summary_label != null:
-		_summary_label.text = "🌾 Foragers: %d  |  ⛏ Diggers: %d  |  🍼 Nurses: %d  |  ⚔ Defenders: %d  |  📌 Pinned: %d" % [
+		_summary_label.text = "🌾 Foragers: %d  |  ⛏ Diggers: %d  |  🍼 Nurses: %d  |  ⚔ Defenders: %d" % [
 			counts[Enums.JobType.FORAGE],
 			counts[Enums.JobType.DIG],
 			counts[Enums.JobType.NURSE],
-			counts[Enums.JobType.DEFEND],
-			pinned_count
+			counts[Enums.JobType.DEFEND]
 		]
 
 	# Rebuild rows efficiently
@@ -165,8 +158,7 @@ func _create_ant_card(ant: AntController) -> PanelContainer:
 	top_line.add_child(name_lbl)
 
 	var job_lbl: Label = Label.new()
-	var pin_str: String = " 📌" if ant.is_manually_pinned else ""
-	job_lbl.text = " [%s%s]" % [JOB_NAMES.get(ant.current_job, "Worker"), pin_str]
+	job_lbl.text = " [%s]" % JOB_NAMES.get(ant.current_job, "Worker")
 	job_lbl.modulate = JOB_COLORS.get(ant.current_job, Color.WHITE)
 	job_lbl.add_theme_font_size_override("font_size", 13)
 	top_line.add_child(job_lbl)
@@ -213,23 +205,12 @@ func _create_ant_card(ant: AntController) -> PanelContainer:
 		r_btn.tooltip_text = "Directly assign: %s" % JOB_NAMES.get(role, "")
 		r_btn.custom_minimum_size = Vector2(58, 22)
 		r_btn.add_theme_font_size_override("font_size", 11)
-		if ant.current_job == role and ant.is_manually_pinned:
+		if ant.current_job == role:
 			r_btn.disabled = true
 		r_btn.pressed.connect(func() -> void:
 			_assign_role_to_ant(ant, role)
 		)
 		actions_hbox.add_child(r_btn)
-
-	if ant.is_manually_pinned:
-		var unpin_btn: Button = Button.new()
-		unpin_btn.text = "🔓 Auto"
-		unpin_btn.tooltip_text = "Unpin — return to slider auto-allocation"
-		unpin_btn.custom_minimum_size = Vector2(52, 22)
-		unpin_btn.add_theme_font_size_override("font_size", 11)
-		unpin_btn.pressed.connect(func() -> void:
-			_unpin_ant(ant)
-		)
-		actions_hbox.add_child(unpin_btn)
 
 	# View button on the right
 	var view_btn: Button = Button.new()

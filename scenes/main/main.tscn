@@ -58,7 +58,7 @@ script = ExtResource("4_cursor")
 
 [node name="SelectionController" type="Node2D" parent="." node_paths=PackedStringArray("selection_popup")]
 script = ExtResource("18_selection")
-selection_popup = NodePath("UILayer/SelectionPopup")
+selection_popup = NodePath("../UILayer/SelectionPopup")
 
 [node name="WeatherController" type="Node2D" parent="."]
 script = ExtResource("7_weather")

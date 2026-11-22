@@ -103,12 +103,20 @@ func tick_starvation(delta: float) -> void:
 		GameManager.trigger_defeat("Queen died of starvation!")
 
 func attempt_lay_egg() -> void:
-	if not is_starving and GameManager.total_workers_alive < 50:
-		queen_laid_egg.emit()
-		var spawn_pos: Vector2 = global_position + Vector2(randf_range(-24.0, 24.0), 12.0)
-		var nursery = get_node_or_null("/root/NurseryManager")
-		if nursery != null and nursery.has_method("spawn_egg"):
-			nursery.spawn_egg(spawn_pos)
+	if is_starving or GameManager.total_workers_alive >= 50:
+		return
+	
+	# Colony law: Queen cannot birth more ants unless stored food exceeds 50% capacity
+	if ResourceManager != null and ResourceManager.get_max_capacity() > 0:
+		var food_ratio: float = float(ResourceManager.stored_food) / float(ResourceManager.get_max_capacity())
+		if food_ratio <= 0.5:
+			return
+
+	queen_laid_egg.emit()
+	var spawn_pos: Vector2 = global_position + Vector2(randf_range(-24.0, 24.0), 12.0)
+	var nursery = get_node_or_null("/root/NurseryManager")
+	if nursery != null and nursery.has_method("spawn_egg"):
+		nursery.spawn_egg(spawn_pos)
 
 
 ## Returns current health as 0.0–1.0 ratio for HUD display.

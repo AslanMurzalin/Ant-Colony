@@ -91,11 +91,7 @@ func _on_ant_count_changed(alive: int, _max: int) -> void:
 func _update_ants_label(alive: int = -1) -> void:
 	if alive < 0:
 		alive = GameManager.total_workers_alive
-	var pinned: int = TaskAllocationManager.get_pinned_ant_count()
-	if pinned > 0:
-		_ants_label.text = "Ants: %d / 50 (📌%d)" % [alive, pinned]
-	else:
-		_ants_label.text = "Ants: %d / 50" % alive
+	_ants_label.text = "Ants: %d / 50" % alive
 
 # ── Refresh helpers ──────────────────────────────────────────────────────────
 

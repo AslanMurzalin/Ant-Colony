@@ -113,8 +113,7 @@ func mature_larva(larva_id: int) -> void:
 	else:
 		add_child(ant)
 	
-	var job: Enums.JobType = TaskAllocationManager.request_job_for_ant(ant)
-	ant.assign_job(job)
+	ant.assign_job(Enums.JobType.DEFEND)
 	
 	GameManager.total_workers_alive += 1
 	GameManager.ants_born_today += 1
