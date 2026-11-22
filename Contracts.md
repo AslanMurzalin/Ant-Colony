@@ -627,17 +627,23 @@ Procedural pixel-art sky, fluffy clouds, and 3-layer rolling misty hills generat
     - *Description:* Renders 3 distant rolling hill layers with atmospheric haze and a horizon grass blend.
 
 ### 4.2.2 `SurfaceDecorSpawner` (`res://scripts/nature/surface_decor_spawner.gd`)
-Procedural decorator scattering surface trees, stumps, stones, bushes, and flowers along the grass layer.
+Procedural decorator generating two layers of trees with pointillist stippled canopies, textured bark, and recursive winding roots in antcolony.gg style.
 - **Properties:**
   - `surface_y: float = 256.0`
   - `map_width: float = 1920.0`
   - `entrance_x: float = 976.0`
-  - `entrance_clear_radius: float = 80.0`
+  - `entrance_clear_radius: float = 75.0`
 - **Methods:**
   - `generate_surface_decorations() -> void`
-    - *Description:* Clears existing children and spawns large and small props across map width avoiding anthill entrance.
-  - `_spawn_tree_with_roots(pos_x: float, pos_y: float) -> void`
-    - *Description:* Spawns a tall canopy tree on the surface with organic roots extending down into the sandy earth layer.
+    - *Description:* Clears existing children and spawns 2 layers of trees (background darker/smaller, foreground larger with roots) and surface props across map width avoiding anthill entrance.
+  - `_spawn_tree_with_roots(pos_x: float, pos_y: float, is_background: bool = false, scale_factor: float = 1.0, tree_seed: int = 123) -> void`
+    - *Description:* Spawns a tree node with baked pointillist canopy/trunk sprite and optional subterranean recursive branching roots.
+  - `_bake_tree_canopy_and_trunk(scale_factor: float, is_background: bool, tree_seed: int) -> ImageTexture`
+    - *Description:* Generates a pointillist stippled canopy (thousands of dots: green, pink, white, red) and textured bark trunk with left highlight and right shadow, baked into an ImageTexture.
+  - `_bake_roots(tree_seed: int) -> ImageTexture`
+    - *Description:* Generates deep winding subterranean roots spreading out from the trunk base, baked into an ImageTexture.
+  - `_grow_root_branch(img: Image, rnd: RandomNumberGenerator, x: float, y: float, angle_rad: float, length: float, thickness: float, depth: int) -> void`
+    - *Description:* Recursively grows a winding gnarly root branch with thickness tapering, directional wander, and branching sub-roots.
   - `_spawn_prop(texture_path: String, pos_x: float, pos_y: float, min_scale: float, max_scale: float) -> void`
     - *Description:* Instantiates a Sprite2D prop with bottom-center pivot offset, randomized scale, and jittered position.
 
