@@ -9,11 +9,15 @@ signal roster_toggled()
 const SPEED_PAUSE: float = 0.0
 const SPEED_1X:    float = 1.0
 const SPEED_2X:    float = 2.0
+const SPEED_4X:    float = 4.0
+const SPEED_8X:    float = 8.0
 
 const COLOR_GOLD_ACCENT: Color = Color(0.949, 0.659, 0.114, 1.0) # #F2A81D
 const COLOR_DARK_BG: Color     = Color(0.102, 0.082, 0.071, 1.0) # #1A1512
 const COLOR_BUTTON_BG: Color   = Color(0.150, 0.120, 0.100, 1.0) # #261F1A
 const COLOR_BUTTON_TEXT: Color = Color(0.850, 0.800, 0.750, 1.0)
+
+var _previous_speed: float = SPEED_1X
 
 @onready var _day_label:       Label       = $PanelContainer/HBoxContainer/DayBlock/DayLabel
 @onready var _day_bar:         ProgressBar = $PanelContainer/HBoxContainer/DayBlock/DayBar
@@ -24,6 +28,8 @@ const COLOR_BUTTON_TEXT: Color = Color(0.850, 0.800, 0.750, 1.0)
 @onready var _btn_pause:       Button      = $PanelContainer/HBoxContainer/SpeedButtons/BtnPause
 @onready var _btn_1x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn1x
 @onready var _btn_2x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn2x
+@onready var _btn_4x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn4x
+@onready var _btn_8x:          Button      = $PanelContainer/HBoxContainer/SpeedButtons/Btn8x
 @onready var _btn_roster:      Button      = $PanelContainer/HBoxContainer/BtnRoster
 
 
@@ -36,9 +42,13 @@ func _ready() -> void:
 		_update_ants_label()
 	)
 
-	_btn_pause.connect("pressed", func() -> void: _set_speed(SPEED_PAUSE))
+	_btn_pause.connect("pressed", func() -> void: _toggle_pause())
 	_btn_1x.connect("pressed",   func() -> void: _set_speed(SPEED_1X))
 	_btn_2x.connect("pressed",   func() -> void: _set_speed(SPEED_2X))
+	if _btn_4x != null:
+		_btn_4x.connect("pressed", func() -> void: _set_speed(SPEED_4X))
+	if _btn_8x != null:
+		_btn_8x.connect("pressed", func() -> void: _set_speed(SPEED_8X))
 	if _btn_roster != null:
 		_btn_roster.connect("pressed", _on_roster_pressed)
 		_style_roster_button()
@@ -68,28 +78,50 @@ func _on_roster_pressed() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed:
-		if event.keycode == KEY_SPACE:
+	if event is InputEventKey and event.pressed and not event.echo:
+		var key_event: InputEventKey = event as InputEventKey
+		if key_event.keycode == KEY_SPACE:
 			_toggle_pause()
+			get_viewport().set_input_as_handled()
+		elif key_event.keycode == KEY_F1 or key_event.keycode == KEY_KP_1 or (key_event.keycode == KEY_1 and key_event.shift_pressed):
+			_set_speed(SPEED_1X)
+			get_viewport().set_input_as_handled()
+		elif key_event.keycode == KEY_F2 or key_event.keycode == KEY_KP_2 or (key_event.keycode == KEY_2 and key_event.shift_pressed):
+			_set_speed(SPEED_2X)
+			get_viewport().set_input_as_handled()
+		elif key_event.keycode == KEY_F3 or key_event.keycode == KEY_KP_3 or (key_event.keycode == KEY_3 and key_event.shift_pressed):
+			_set_speed(SPEED_4X)
+			get_viewport().set_input_as_handled()
+		elif key_event.keycode == KEY_F4 or key_event.keycode == KEY_KP_4 or (key_event.keycode == KEY_4 and key_event.shift_pressed):
+			_set_speed(SPEED_8X)
+			get_viewport().set_input_as_handled()
 
 
 # ── Speed ────────────────────────────────────────────────────────────────────
 
 func _set_speed(speed: float) -> void:
+	if speed > 0.0:
+		_previous_speed = speed
 	GameManager.set_game_speed(speed)
 	_update_speed_buttons(speed)
 
 
 func _toggle_pause() -> void:
 	var current: float = Engine.time_scale
-	var next: float = SPEED_PAUSE if current > 0.0 else SPEED_1X
-	_set_speed(next)
+	if current > 0.0:
+		_previous_speed = current
+		_set_speed(SPEED_PAUSE)
+	else:
+		var resume_speed: float = _previous_speed if _previous_speed > 0.0 else SPEED_1X
+		_set_speed(resume_speed)
 
 
 func _update_speed_buttons(speed: float) -> void:
-	_apply_speed_style(_btn_pause, speed == SPEED_PAUSE)
-	_apply_speed_style(_btn_1x,    speed == SPEED_1X)
-	_apply_speed_style(_btn_2x,    speed == SPEED_2X)
+	_apply_speed_style(_btn_pause, is_equal_approx(speed, SPEED_PAUSE))
+	_apply_speed_style(_btn_1x,    is_equal_approx(speed, SPEED_1X))
+	_apply_speed_style(_btn_2x,    is_equal_approx(speed, SPEED_2X))
+	_apply_speed_style(_btn_4x,    is_equal_approx(speed, SPEED_4X))
+	_apply_speed_style(_btn_8x,    is_equal_approx(speed, SPEED_8X))
 
 
 func _apply_speed_style(btn: Button, is_active: bool) -> void:

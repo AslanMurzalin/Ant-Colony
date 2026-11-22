@@ -91,7 +91,7 @@ Oversees the run lifecycle, day-night progression, game speed, win/lose evaluati
 - `start_new_run(optional_seed: int = -1) -> void`
   - *Description:* Initializes a new 10-day run. If seed is -1, generates a random 64-bit integer. Sets Day 1, resets colony stats, spawns Queen and initial 5 workers.
 - `set_game_speed(multiplier: float) -> void`
-  - *Description:* Sets engine time scale (`Engine.time_scale = multiplier`) and updates `simulation_speed`. Valid values: `0.0`, `1.0`, `2.0`.
+  - *Description:* Sets engine time scale (`Engine.time_scale = multiplier`) and updates `simulation_speed`. Valid values: `0.0`, `1.0`, `2.0`, `4.0`, `8.0`. Dynamically configures `Engine.max_physics_steps_per_frame` (16 for >=8.0, 12 for >=4.0, 8 for <=2.0).
 - `advance_day() -> void`
   - *Description:* Concludes the current day, gathers day summary metrics, pauses real-time simulation, and emits `day_ended`.
 - `start_next_day() -> void`
@@ -826,6 +826,8 @@ Top HUD strip — Day, day progress bar, Food, Ants alive, Queen HP, speed butto
 - `SPEED_PAUSE: float = 0.0`
 - `SPEED_1X: float = 1.0`
 - `SPEED_2X: float = 2.0`
+- `SPEED_4X: float = 4.0`
+- `SPEED_8X: float = 8.0`
 
 #### Methods
 - `_on_roster_pressed() -> void`
@@ -833,9 +835,9 @@ Top HUD strip — Day, day progress bar, Food, Ants alive, Queen HP, speed butto
 - `_set_speed(speed: float) -> void`
   - *Description:* Calls `GameManager.set_game_speed(speed)` and refreshes button modulate states.
 - `_toggle_pause() -> void`
-  - *Description:* Toggles between `SPEED_PAUSE` and `SPEED_1X`; bound to `Space` key.
+  - *Description:* Toggles between `SPEED_PAUSE` and the previous active game speed (restoring 1×, 2×, 4×, or 8×); bound to `Space` key.
 - `_update_speed_buttons(speed: float) -> void`
-  - *Description:* Highlights the active speed button, grays out others.
+  - *Description:* Highlights the active speed button (Pause, 1×, 2×, 4×, 8×), grays out others.
 - `_on_day_started(day: int) -> void`
   - *Description:* Updates `_day_label` text and resets `_day_bar` to 0.
 - `_on_day_progress(pct: float) -> void`

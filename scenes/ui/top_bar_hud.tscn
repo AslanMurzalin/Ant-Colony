@@ -140,19 +140,31 @@ alignment = 1
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
 text = "⏸"
-tooltip_text = "Pause (Space)"
+tooltip_text = "Pause / Resume (Space)"
 
 [node name="Btn1x" type="Button" parent="PanelContainer/HBoxContainer/SpeedButtons"]
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
 text = "1×"
-tooltip_text = "Normal speed"
+tooltip_text = "Normal speed (F1 / Numpad 1 / Shift+1)"
 
 [node name="Btn2x" type="Button" parent="PanelContainer/HBoxContainer/SpeedButtons"]
 custom_minimum_size = Vector2(38, 38)
 layout_mode = 2
 text = "2×"
-tooltip_text = "Fast speed"
+tooltip_text = "Fast speed (F2 / Numpad 2 / Shift+2)"
+
+[node name="Btn4x" type="Button" parent="PanelContainer/HBoxContainer/SpeedButtons"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+text = "4×"
+tooltip_text = "Turbo speed (F3 / Numpad 3 / Shift+3)"
+
+[node name="Btn8x" type="Button" parent="PanelContainer/HBoxContainer/SpeedButtons"]
+custom_minimum_size = Vector2(38, 38)
+layout_mode = 2
+text = "8×"
+tooltip_text = "Ultra speed (F4 / Numpad 4 / Shift+4)"
 
 [node name="BtnRoster" type="Button" parent="PanelContainer/HBoxContainer"]
 custom_minimum_size = Vector2(160, 38)

@@ -18,6 +18,7 @@ var egg_laying_interval: float = 20.0
 var is_starving: bool = false
 var starvation_damage_rate: float = 2.0
 var distress_timer: float = 0.0
+var _anim_time: float = 0.0
 
 static var _cached_queen_texture: ImageTexture = null
 
@@ -154,17 +155,18 @@ func _process_queen_logic(delta: float) -> void:
 			egg_laying_timer = egg_laying_interval
 
 func _update_visuals(delta: float) -> void:
+	_anim_time += delta
 	if distress_timer > 0.0:
 		distress_timer -= delta
 		modulate = Color(1.0, 0.4, 0.4, 1.0)
 	elif is_starving:
-		var blink: float = 0.7 + 0.3 * sin(Time.get_ticks_msec() * 0.01)
+		var blink: float = 0.7 + 0.3 * sin(_anim_time * 10.0)
 		modulate = Color(1.0, blink, blink, 1.0)
 	else:
 		modulate = Color(1.0, 1.0, 1.0, 1.0)
 	
-	# Subtle breathing animation on queen body
-	var breath_t: float = Time.get_ticks_msec() * 0.0025
+	# Анимация дыхания королевы, привязанная к игровому времени (масштабируется со скоростью)
+	var breath_t: float = _anim_time * 2.5
 	var breath_x: float = 1.0 + 0.035 * sin(breath_t)
 	var breath_y: float = 1.0 + 0.015 * sin(breath_t)
 	if sprite != null:

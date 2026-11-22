@@ -68,6 +68,14 @@ func set_game_speed(multiplier: float) -> void:
 		Engine.time_scale = 0.0
 	else:
 		Engine.time_scale = simulation_speed
+		# При сверхвысоких скоростях (4x, 8x) выделяем запас шагов физики на кадр,
+		# чтобы симуляция муравьёв, копания и перемещений не пропускала тики при просадке кадров.
+		if simulation_speed >= 8.0:
+			Engine.max_physics_steps_per_frame = 16
+		elif simulation_speed >= 4.0:
+			Engine.max_physics_steps_per_frame = 12
+		else:
+			Engine.max_physics_steps_per_frame = 8
 	game_speed_changed.emit(simulation_speed)
 
 func advance_day() -> void:

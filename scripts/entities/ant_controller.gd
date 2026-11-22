@@ -230,16 +230,21 @@ func move_along_path(delta: float) -> bool:
 		return true
 
 	var target_wp: Vector2 = path_waypoints[current_path_index]
-	var dist: float = global_position.distance_to(target_wp)
-	
-	if dist <= 8.0:
+	var to_wp: Vector2 = target_wp - global_position
+	var dist: float = to_wp.length()
+	var step: float = move_speed * delta
+
+	# На высоких скоростях (4x, 8x) радиус прибытия адаптируется к длине шага за кадр,
+	# чтобы муравьи не перешагивали контрольные точки пути.
+	if dist <= maxf(8.0, step * 1.25):
 		current_path_index += 1
 		if current_path_index >= path_waypoints.size():
 			velocity = Vector2.ZERO
 			return true
 		target_wp = path_waypoints[current_path_index]
+		to_wp = target_wp - global_position
 
-	var dir: Vector2 = (target_wp - global_position).normalized()
+	var dir: Vector2 = to_wp.normalized()
 	velocity = dir * move_speed
 	move_and_slide()
 	return false
